@@ -58,7 +58,7 @@ class Message(Static):
         # 送信者ラベルを作成
         sender_label = "あなた" if role == "user" else "ずんだもん"
         content = f"[b]{sender_label}[/b]\n{message}"
-        
+
         super().__init__(content, **kwargs)
         self.add_class(role)
 
