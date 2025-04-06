@@ -369,3 +369,153 @@ class ChatModel:
             state["casper_response"] = response
 
         return state
+
+    async def get_response_with_debate(self, messages: list[dict[str, str]], callback=None, debate_rounds: int = 1):
+        """会話履歴を元に次の応答を生成し、MAGIシステム間で討論を行った上で結果を返す.
+
+        Args:
+            messages: これまでの会話履歴
+            callback: 各MAGIシステムの応答を受け取るコールバック関数
+            debate_rounds: 討論のラウンド数（デフォルト: 1）
+
+        Yields:
+            dict: MAGIシステムの応答状態の更新
+
+        """
+        # 初期の状態
+        state = {"messages": messages}
+
+        # フェーズ1: 各MAGIシステムの初期応答を取得
+        # MELCHIOR（科学者）の初期応答
+        state = await self._get_magi_response(state, MagiSystem.MELCHIOR)
+        melchior_response = state.get("melchior_response", "レスポンスが取得できませんでした")
+        if callback:
+            await callback("melchior", melchior_response, "initial")
+        yield {"system": "melchior", "response": melchior_response, "phase": "initial"}
+
+        # BALTHASAR（母親）の初期応答
+        state = await self._get_magi_response(state, MagiSystem.BALTHASAR)
+        balthasar_response = state.get("balthasar_response", "レスポンスが取得できませんでした")
+        if callback:
+            await callback("balthasar", balthasar_response, "initial")
+        yield {"system": "balthasar", "response": balthasar_response, "phase": "initial"}
+
+        # CASPER（女性）の初期応答
+        state = await self._get_magi_response(state, MagiSystem.CASPER)
+        casper_response = state.get("casper_response", "レスポンスが取得できませんでした")
+        if callback:
+            await callback("casper", casper_response, "initial")
+        yield {"system": "casper", "response": casper_response, "phase": "initial"}
+
+        # フェーズ2: 討論ラウンド
+        melchior_final = melchior_response
+        balthasar_final = balthasar_response
+        casper_final = casper_response
+
+        for round_num in range(debate_rounds):
+            # 討論用のプロンプトを作成
+            debate_prompt = f"""
+これまでの議論を踏まえて、あなたの立場から意見を改めて述べてください。
+他のMAGIシステムの意見に対して同意または反論し、自分の視点から分析してください。
+
+【質問】
+{messages[-1]["content"]}
+
+【MELCHIOR（科学者）の見解】
+{melchior_final}
+
+【BALTHASAR（母親）の見解】
+{balthasar_final}
+
+【CASPER（女性）の見解】
+{casper_final}
+
+あなたの立場からの分析と結論を述べてください。
+"""
+
+            # MELCHIORの討論
+            melchior_debate_messages = [
+                {"role": "system", "content": f"あなたはMAGIシステムの{MagiSystem.MELCHIOR.value}です。{MagiPersonality.MELCHIOR.value}として回答してください。"},
+                {"role": "user", "content": debate_prompt}
+            ]
+
+            melchior_debate_response = await asyncio.get_event_loop().run_in_executor(
+                None, lambda: self._call_ollama_api(melchior_debate_messages) if self.api_type == "ollama" else self._call_litellm_api(melchior_debate_messages)
+            )
+
+            melchior_final = melchior_debate_response
+            if callback:
+                await callback("melchior", melchior_debate_response, f"debate_{round_num+1}")
+            yield {"system": "melchior", "response": melchior_debate_response, "phase": f"debate_{round_num+1}"}
+
+            # BALTHASARの討論
+            balthasar_debate_messages = [
+                {"role": "system", "content": f"あなたはMAGIシステムの{MagiSystem.BALTHASAR.value}です。{MagiPersonality.BALTHASAR.value}として回答してください。"},
+                {"role": "user", "content": debate_prompt}
+            ]
+
+            balthasar_debate_response = await asyncio.get_event_loop().run_in_executor(
+                None, lambda: self._call_ollama_api(balthasar_debate_messages) if self.api_type == "ollama" else self._call_litellm_api(balthasar_debate_messages)
+            )
+
+            balthasar_final = balthasar_debate_response
+            if callback:
+                await callback("balthasar", balthasar_debate_response, f"debate_{round_num+1}")
+            yield {"system": "balthasar", "response": balthasar_debate_response, "phase": f"debate_{round_num+1}"}
+
+            # CASPERの討論
+            casper_debate_messages = [
+                {"role": "system", "content": f"あなたはMAGIシステムの{MagiSystem.CASPER.value}です。{MagiPersonality.CASPER.value}として回答してください。"},
+                {"role": "user", "content": debate_prompt}
+            ]
+
+            casper_debate_response = await asyncio.get_event_loop().run_in_executor(
+                None, lambda: self._call_ollama_api(casper_debate_messages) if self.api_type == "ollama" else self._call_litellm_api(casper_debate_messages)
+            )
+
+            casper_final = casper_debate_response
+            if callback:
+                await callback("casper", casper_debate_response, f"debate_{round_num+1}")
+            yield {"system": "casper", "response": casper_debate_response, "phase": f"debate_{round_num+1}"}
+
+        # フェーズ3: 最終的な合議結果を生成
+        consensus_prompt = f"""
+以下のMAGIシステム3つの分析結果に基づいて、最終的な判断を下してください。
+各システムの視点を統合し、バランスの取れた結論を導き出してください。
+
+【質問】
+{messages[-1]["content"]}
+
+【MELCHIOR（科学者）の最終見解】
+{melchior_final}
+
+【BALTHASAR（母親）の最終見解】
+{balthasar_final}
+
+【CASPER（女性）の最終見解】
+{casper_final}
+
+3つの視点を総合した最終判断を述べてください。
+"""
+
+        consensus_messages = [
+            {"role": "system", "content": "あなたはMAGI合議システムです。3つのMAGIシステムの判断を総合して最終的な結論を出してください。"},
+            {"role": "user", "content": consensus_prompt}
+        ]
+
+        consensus_response = await asyncio.get_event_loop().run_in_executor(
+            None, lambda: self._call_ollama_api(consensus_messages) if self.api_type == "ollama" else self._call_litellm_api(consensus_messages)
+        )
+
+        # 最終的な合議結果
+        final_response = (
+            f"【MAGI合議システム - 討論結果】\n\n"
+            f"■ MELCHIOR（科学者）の最終見解:\n{melchior_final}\n\n"
+            f"■ BALTHASAR（母親）の最終見解:\n{balthasar_final}\n\n"
+            f"■ CASPER（女性）の最終見解:\n{casper_final}\n\n"
+            f"【最終判断】\n{consensus_response}\n"
+        )
+
+        if callback:
+            await callback("consensus", final_response, "final")
+        yield {"system": "consensus", "response": final_response, "phase": "final"}

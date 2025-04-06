@@ -18,6 +18,7 @@ def escape_markup(text: str) -> str:
 
     Returns:
         str: エスケープされたテキスト
+
     """
     # '[' と ']' をエスケープして、マークアップとして解釈されないようにする
     return text.replace("[", "\\[").replace("]", "\\]")
@@ -116,7 +117,7 @@ class MagiSystemMessage(Static):
     }
     .waiting {
         color: #888888;
-        font-style: italic;
+        text-style: italic;
     }
     .header {
         color: #AAAAAA;
@@ -228,6 +229,7 @@ class SimpleMagiMessage(Static):
         Args:
             system: システム名 (melchior, balthasar, casper, consensus)
             response: 新しい応答内容
+
         """
         if system == "melchior":
             self.melchior_response = response
@@ -264,6 +266,170 @@ class SimpleMagiMessage(Static):
             content += f"{self.consensus_response}"
 
         # マークアップなしでシンプルに更新
+        self.update(content)
+
+
+class DebatingMagiMessage(Static):
+    """討論機能を持つMAGIシステムメッセージ表示ウィジェット."""
+
+    DEFAULT_CSS = """
+    DebatingMagiMessage {
+        width: 100%;
+        padding: 1 1;
+        margin: 1 0;
+        border: solid #333333;
+        border-top: none;
+        border-right: none;
+        border-bottom: solid #333333;
+        border-left: none;
+        color: #FFFFFF;
+        background: #2a2a42;
+        border-left: solid #8888FF;
+        padding-left: 2;
+    }
+
+    .melchior {
+        color: #FFD700;  /* 金色 */
+        background: #2a2038;
+        border-left: solid #AA0000;
+    }
+
+    .balthasar {
+        color: #98FB98;  /* 薄緑色 */
+        background: #1a3a2a;
+        border-left: solid #00AA00;
+    }
+
+    .casper {
+        color: #ADD8E6;  /* 水色 */
+        background: #1a2a3a;
+        border-left: solid #0000AA;
+    }
+
+    .consensus {
+        color: #FFFFFF;
+        background: #2a2a42;
+        border-left: solid #8888FF;
+    }
+
+    .waiting {
+        color: #888888;
+        text-style: italic;
+    }
+
+    .phase-label {
+        color: #AAAAAA;
+        background: #2a2a2a;
+        padding: 0 1;
+        margin-right: 1;
+    }
+
+    .header {
+        color: #AAAAAA;
+        text-style: bold;
+    }
+    """
+
+    def __init__(self, **kwargs: Any) -> None:
+        """討論機能付きMAGIシステムのメッセージウィジェットを初期化する."""
+        super().__init__("", **kwargs)
+        self.add_class("assistant")
+
+        # 各システムの状態を初期化（フェーズごと）
+        self.melchior_responses = {"initial": "応答待ち...", "debate_1": "", "final": ""}
+        self.balthasar_responses = {"initial": "応答待ち...", "debate_1": "", "final": ""}
+        self.casper_responses = {"initial": "応答待ち...", "debate_1": "", "final": ""}
+        self.consensus_response = ""
+
+        # 表示するフェーズを設定
+        self.current_phase = "initial"
+
+        # 初期表示を設定
+        self._update_content()
+
+    def update_response(self, system: str, response: str, phase: str = "initial") -> None:
+        """指定したシステムの応答を更新する.
+
+        Args:
+            system: システム名 (melchior, balthasar, casper, consensus)
+            response: 新しい応答内容
+            phase: 応答フェーズ（"initial", "debate_1", "debate_2", ..., "final"）
+
+        """
+        # 応答内容を更新
+        if system == "melchior":
+            self.melchior_responses[phase] = response
+            # 表示フェーズを更新
+            if phase != "initial":
+                self.current_phase = phase
+        elif system == "balthasar":
+            self.balthasar_responses[phase] = response
+        elif system == "casper":
+            self.casper_responses[phase] = response
+        elif system == "consensus":
+            self.consensus_response = response
+            self.current_phase = "final"
+
+        self._update_content()
+
+    def _update_content(self) -> None:
+        """表示内容を更新する."""
+        content = "ずんだもん\n"
+        content += "【MAGI合議システム】\n\n"
+
+        # 現在のフェーズに応じた表示内容を生成
+        if self.current_phase == "initial":
+            content += "【第一段階: 初期分析】\n\n"
+
+            # MELCHIOR
+            content += "■ MELCHIOR（科学者）:\n"
+            content += f"{self.melchior_responses['initial']}\n\n"
+
+            # BALTHASAR
+            content += "■ BALTHASAR（母親）:\n"
+            content += f"{self.balthasar_responses['initial']}\n\n"
+
+            # CASPER
+            content += "■ CASPER（女性）:\n"
+            content += f"{self.casper_responses['initial']}\n\n"
+
+        elif self.current_phase.startswith("debate_"):
+            round_num = self.current_phase.split("_")[1]
+            content += f"【第二段階: 討論 (ラウンド {round_num})】\n\n"
+
+            # MELCHIOR
+            content += "■ MELCHIOR（科学者）:\n"
+            content += f"{self.melchior_responses[self.current_phase]}\n\n"
+
+            # BALTHASAR
+            content += "■ BALTHASAR（母親）:\n"
+            content += f"{self.balthasar_responses[self.current_phase]}\n\n"
+
+            # CASPER
+            content += "■ CASPER（女性）:\n"
+            content += f"{self.casper_responses[self.current_phase]}\n\n"
+
+        elif self.current_phase == "final":
+            content += "【第三段階: 最終判断】\n\n"
+
+            # MELCHIOR の最終見解
+            last_debate_phase = max([phase for phase in self.melchior_responses.keys() if phase.startswith("debate_")], default="initial")
+            content += "■ MELCHIOR（科学者）の最終見解:\n"
+            content += f"{self.melchior_responses[last_debate_phase]}\n\n"
+
+            # BALTHASAR の最終見解
+            content += "■ BALTHASAR（母親）の最終見解:\n"
+            content += f"{self.balthasar_responses[last_debate_phase]}\n\n"
+
+            # CASPER の最終見解
+            content += "■ CASPER（女性）の最終見解:\n"
+            content += f"{self.casper_responses[last_debate_phase]}\n\n"
+
+            # 最終判断
+            content += "【最終判断】\n"
+            content += f"{self.consensus_response}"
+
+        # マークアップなしで更新
         self.update(content)
 
 
@@ -354,6 +520,7 @@ class ChatArea(Container):
 
         Args:
             user_message: ユーザーが入力したメッセージ
+
         """
         # MAGIシステムメッセージを作成
         message_area = self.query_one("#message-area")
@@ -372,6 +539,30 @@ class ChatArea(Container):
             # すでにコールバックで処理されているので、ここでは何もしない
             pass
 
+    async def get_ai_response_with_debate(self, user_message: str) -> None:
+        """AIからの応答をストリーミングで取得し、討論を行った上で表示する.
+
+        Args:
+            user_message: ユーザーが入力したメッセージ
+
+        """
+        # 討論機能付きのMAGIシステムメッセージを作成
+        message_area = self.query_one("#message-area")
+        magi_message = DebatingMagiMessage()
+        message_area.mount(magi_message)
+        message_area.scroll_end()
+
+        # 各MAGIシステムからの応答をストリーミングで処理するコールバック
+        async def update_magi_response(system, response, phase):
+            """各MAGIシステムの応答を受け取るコールバック関数"""
+            magi_message.update_response(system, response, phase)
+            message_area.scroll_end()
+
+        # 討論を含むストリーミングレスポンスを取得 (1ラウンドの討論)
+        async for response in self.chat_model.get_response_with_debate(self.messages, update_magi_response, debate_rounds=1):
+            # すでにコールバックで処理されているので、ここでは何もしない
+            pass
+
     async def send_message(self) -> None:
         """メッセージを送信する."""
         input_widget = self.query_one("#message-input", Input)
@@ -386,8 +577,8 @@ class ChatArea(Container):
         # 入力欄をクリアするのだ
         input_widget.value = ""
 
-        # LLMからの応答をストリーミングで取得するのだ
-        await self.get_ai_response_streaming(message)
+        # 討論機能を使ったLLMからの応答をストリーミングで取得するのだ
+        await self.get_ai_response_with_debate(message)
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         """入力が送信されたときの処理.
