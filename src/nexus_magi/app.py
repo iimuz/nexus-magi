@@ -16,14 +16,33 @@ class Message(Static):
     DEFAULT_CSS = """
     Message {
         width: 100%;
-        padding: 0 1;
-        margin: 0 0;
+        padding: 1 1;
+        margin: 1 0;
+        border: solid #333333;
+        border-top: none;
+        border-right: none;
+        border-bottom: solid #333333;
+        border-left: none;
     }
     .user {
         color: #00FF00;
+        background: #1e3a1e;
+        border-left: solid #00AA00;
+        padding-left: 2;
     }
     .assistant {
         color: #FFFFFF;
+        background: #2a2a42;
+        border-left: solid #8888FF;
+        padding-left: 2;
+    }
+    .sender {
+        color: #AAAAAA;
+        text-style: bold;
+        margin-bottom: 1;
+    }
+    .content {
+        margin-left: 1;
     }
     """
 
@@ -36,7 +55,11 @@ class Message(Static):
             **kwargs: その他の引数
 
         """
-        super().__init__(message, **kwargs)
+        # 送信者ラベルを作成
+        sender_label = "あなた" if role == "user" else "ずんだもん"
+        content = f"[b]{sender_label}[/b]\n{message}"
+        
+        super().__init__(content, **kwargs)
         self.add_class(role)
 
 
