@@ -285,3 +285,87 @@ class ChatModel:
         )
 
         return result["final_response"]
+
+    async def get_response_streaming(self, messages: list[dict[str, str]], callback=None):
+        """会話履歴を元に次の応答を生成し、結果をストリーミングで返す.
+
+        Args:
+            messages: これまでの会話履歴
+            callback: 各MAGIシステムの応答を受け取るコールバック関数
+
+        Yields:
+            dict: MAGIシステムの応答状態の更新
+
+        """
+        # MAGIシステムの応答を順次処理する
+        state = {"messages": messages}
+
+        # MELCHIOR
+        state = await self._get_magi_response(state, MagiSystem.MELCHIOR)
+        melchior_response = state.get("melchior_response", "レスポンスが取得できませんでした")
+        if callback:
+            await callback("melchior", melchior_response)
+        yield {"system": "melchior", "response": melchior_response}
+
+        # BALTHASAR
+        state = await self._get_magi_response(state, MagiSystem.BALTHASAR)
+        balthasar_response = state.get("balthasar_response", "レスポンスが取得できませんでした")
+        if callback:
+            await callback("balthasar", balthasar_response)
+        yield {"system": "balthasar", "response": balthasar_response}
+
+        # CASPER
+        state = await self._get_magi_response(state, MagiSystem.CASPER)
+        casper_response = state.get("casper_response", "レスポンスが取得できませんでした")
+        if callback:
+            await callback("casper", casper_response)
+        yield {"system": "casper", "response": casper_response}
+
+        # 最終的な合議結果を生成
+        final_response = (
+            f"【MAGI合議システム - 判定結果】\n\n"
+            f"■ MELCHIOR（科学者）の見解:\n{melchior_response}\n\n"
+            f"■ BALTHASAR（母親）の見解:\n{balthasar_response}\n\n"
+            f"■ CASPER（女性）の見解:\n{casper_response}\n\n"
+            f"【最終判断】\n"
+            f"以上の3つの視点を総合して判断するのだ。\n"
+        )
+
+        if callback:
+            await callback("consensus", final_response)
+        yield {"system": "consensus", "response": final_response}
+
+    async def _get_magi_response(self, state, magi_type: MagiSystem):
+        """指定したMAGIシステムの応答を非同期で取得する.
+
+        Args:
+            state: 現在の状態
+            magi_type: MAGIシステムの種類
+
+        Returns:
+            dict: 更新された状態
+
+        """
+        messages = self._add_system_instructions(state["messages"], magi_type)
+
+        loop = asyncio.get_event_loop()
+        if self.api_type == "ollama":
+            response = await loop.run_in_executor(
+                None,
+                lambda: self._call_ollama_api(messages)
+            )
+        else:  # litellm
+            response = await loop.run_in_executor(
+                None,
+                lambda: self._call_litellm_api(messages)
+            )
+
+        # MAGIシステムに応じた応答を状態に追加
+        if magi_type == MagiSystem.MELCHIOR:
+            state["melchior_response"] = response
+        elif magi_type == MagiSystem.BALTHASAR:
+            state["balthasar_response"] = response
+        elif magi_type == MagiSystem.CASPER:
+            state["casper_response"] = response
+
+        return state
