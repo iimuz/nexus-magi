@@ -471,15 +471,33 @@ class ChatArea(Container):
 
     messages = reactive([])
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, provider: str = "ollama", api_base: str = None, model: str = None, **kwargs: Any) -> None:
         """チャットエリアを初期化.
 
         Args:
+            provider: 使用するプロバイダー ("ollama" または "litellm")
+            api_base: APIサーバーのベースURL (Noneの場合はデフォルト値を使用)
+            model: 使用するモデル名 (Noneの場合はデフォルト値を使用)
             **kwargs: その他の引数
 
         """
         super().__init__(**kwargs)
-        self.chat_model = ChatModel()
+
+        # プロバイダーに応じたデフォルト値を設定するのだ
+        if api_base is None:
+            if provider == "litellm":
+                api_base = "http://localhost:4000"
+            else:  # ollama
+                api_base = "http://localhost:11434/api"
+
+        if model is None:
+            model = "phi4-mini"
+
+        self.chat_model = ChatModel(
+            api_base=api_base,
+            model=model,
+            api_type=provider,
+        )
 
     def compose(self) -> ComposeResult:
         """UIコンポーネントを構成.
@@ -601,6 +619,20 @@ class ChatApp(App):
     }
     """
 
+    def __init__(self, provider: str = "ollama", api_base: str = None, model: str = None):
+        """チャットアプリケーションを初期化.
+
+        Args:
+            provider: 使用するプロバイダー ("ollama" または "litellm")
+            api_base: APIサーバーのベースURL (Noneの場合はデフォルト値を使用)
+            model: 使用するモデル名 (Noneの場合はデフォルト値を使用)
+
+        """
+        super().__init__()
+        self.provider = provider
+        self.api_base = api_base
+        self.model = model
+
     def compose(self) -> ComposeResult:
         """UIコンポーネントを構成.
 
@@ -609,5 +641,5 @@ class ChatApp(App):
 
         """
         yield Header()
-        yield ChatArea()
+        yield ChatArea(provider=self.provider, api_base=self.api_base, model=self.model)
         yield Footer()
