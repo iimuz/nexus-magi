@@ -65,7 +65,7 @@ class Message(Static):
 
         Args:
             message: 表示するメッセージ
-            role: メッセージの送信者（user または assistant）
+            role: メッセージの送信者(user または assistant)
             **kwargs: その他の引数
 
         """
@@ -170,7 +170,7 @@ class MagiSystemMessage(Static):
         melchior_class = "" if self.melchior_response != "応答待ち..." else " waiting"
         content += (
             f"[b class='header melchior{melchior_class}']■ MELCHIOR"
-            f"（科学者）:[/b]\n"
+            f"(科学者):[/b]\n"
         )
         content += (
             f"[span class='melchior{melchior_class}']"
@@ -181,7 +181,7 @@ class MagiSystemMessage(Static):
         balthasar_class = "" if self.balthasar_response != "応答待ち..." else " waiting"
         content += (
             f"[b class='header balthasar{balthasar_class}']■ BALTHASAR"
-            f"（母親）:[/b]\n"
+            f"(母親):[/b]\n"
         )
         content += (
             f"[span class='balthasar{balthasar_class}']"
@@ -192,7 +192,7 @@ class MagiSystemMessage(Static):
         casper_class = "" if self.casper_response != "応答待ち..." else " waiting"
         content += (
             f"[b class='header casper{casper_class}']■ CASPER"
-            f"（女性）:[/b]\n"
+            f"(女性):[/b]\n"
         )
         content += (
             f"[span class='casper{casper_class}']"
@@ -385,7 +385,7 @@ class DebatingMagiMessage(Static):
         Args:
             system: システム名 (melchior, balthasar, casper, consensus)
             response: 新しい応答内容
-            phase: 応答フェーズ（"initial", "debate_1", "debate_2", ..., "final"）
+            phase: 応答フェーズ("initial", "debate_1", "debate_2", ..., "final")
 
         """
         # 応答内容を更新
@@ -561,7 +561,7 @@ class ChatArea(Container):
 
         # 初期メッセージを表示するのだ
         self.add_message(
-            "こんにちは！ぼくはずんだもんなのだ。どうしたのだ？",
+            "こんにちは!ぼくはずんだもんなのだ。どうしたのだ?",
             "assistant"
         )
 

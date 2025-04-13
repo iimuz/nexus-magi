@@ -13,7 +13,7 @@ def parse_args() -> argparse.Namespace:
         argparse.Namespace: 解析された引数
 
     """
-    parser = argparse.ArgumentParser(description="ずんだもんとチャットするのだ！")
+    parser = argparse.ArgumentParser(description="ずんだもんとチャットするのだ!")
     parser.add_argument(
         "--provider",
         type=str,
