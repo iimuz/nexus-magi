@@ -2,12 +2,16 @@
 
 import asyncio
 import json
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from enum import Enum
 from typing import Any
 
 import requests
 from langgraph.graph import END, StateGraph
+
+
+# HTTPステータスコード
+HTTP_OK = 200
 
 
 class MagiSystem(Enum):
@@ -228,7 +232,7 @@ class ChatModel:
             timeout=60,
         )
 
-        if response.status_code != 200:
+        if response.status_code != HTTP_OK:
             return f"エラーが発生したのだ: {response.status_code} - {response.text}"
 
         try:
@@ -265,7 +269,7 @@ class ChatModel:
             timeout=60,
         )
 
-        if response.status_code != 200:
+        if response.status_code != HTTP_OK:
             return f"エラーが発生したのだ: {response.status_code} - {response.text}"
 
         try:
@@ -294,7 +298,8 @@ class ChatModel:
         return result["final_response"]
 
     async def get_response_streaming(
-        self, messages: list[dict[str, str]], callback: Any | None = None
+        self, messages: list[dict[str, str]], 
+        callback: Callable[[str, str], None] | None = None
     ) -> AsyncGenerator[dict[str, str], None]:
         """会話履歴を元に次の応答を生成し、結果をストリーミングで返す.
 
@@ -388,7 +393,9 @@ class ChatModel:
         return state
 
     async def get_response_with_debate(
-        self, messages: list[dict[str, str]], callback: Any | None = None, debate_rounds: int = 1
+        self, messages: list[dict[str, str]], 
+        callback: Callable[[str, str, str], None] | None = None, 
+        debate_rounds: int = 1
     ) -> AsyncGenerator[dict[str, str], None]:
         """会話履歴を元に次の応答を生成し、MAGIシステム間で討論を行った上で結果を返す.
 

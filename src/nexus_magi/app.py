@@ -60,7 +60,7 @@ class Message(Static):
     }
     """
 
-    def __init__(self, message: str, role: str, **kwargs: Any) -> None:
+    def __init__(self, message: str, role: str, **kwargs) -> None:
         """メッセージウィジェットを初期化する。
 
         Args:
@@ -125,7 +125,7 @@ class MagiSystemMessage(Static):
     }
     """
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs) -> None:
         """MAGIシステムのメッセージウィジェットを初期化する."""
         super().__init__("", **kwargs)
         self.add_class("assistant")
@@ -209,7 +209,7 @@ class SimpleMagiMessage(Static):
     }
     """
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs) -> None:
         """シンプルMAGIシステムのメッセージウィジェットを初期化する."""
         super().__init__("", **kwargs)
         self.add_class("assistant")
@@ -249,15 +249,15 @@ class SimpleMagiMessage(Static):
         content += "【MAGI合議システム】\n\n"
 
         # MELCHIOR
-        content += "■ MELCHIOR（科学者）:\n"
+        content += "■ MELCHIOR(科学者):\n"
         content += f"{self.melchior_response}\n\n"
 
         # BALTHASAR
-        content += "■ BALTHASAR（母親）:\n"
+        content += "■ BALTHASAR(母親):\n"
         content += f"{self.balthasar_response}\n\n"
 
         # CASPER
-        content += "■ CASPER（女性）:\n"
+        content += "■ CASPER(女性):\n"
         content += f"{self.casper_response}\n\n"
 
         # 全てのシステムから回答があれば最終判断を表示
@@ -335,10 +335,22 @@ class DebatingMagiMessage(Static):
         super().__init__("", **kwargs)
         self.add_class("assistant")
 
-        # 各システムの状態を初期化（フェーズごと）
-        self.melchior_responses = {"initial": "応答待ち...", "debate_1": "", "final": ""}
-        self.balthasar_responses = {"initial": "応答待ち...", "debate_1": "", "final": ""}
-        self.casper_responses = {"initial": "応答待ち...", "debate_1": "", "final": ""}
+        # 各システムの状態を初期化(フェーズごと)
+        self.melchior_responses = {
+            "initial": "応答待ち...", 
+            "debate_1": "", 
+            "final": ""
+        }
+        self.balthasar_responses = {
+            "initial": "応答待ち...", 
+            "debate_1": "", 
+            "final": ""
+        }
+        self.casper_responses = {
+            "initial": "応答待ち...", 
+            "debate_1": "", 
+            "final": ""
+        }
         self.consensus_response = ""
 
         # 表示するフェーズを設定
@@ -382,15 +394,15 @@ class DebatingMagiMessage(Static):
             content += "【第一段階: 初期分析】\n\n"
 
             # MELCHIOR
-            content += "■ MELCHIOR（科学者）:\n"
+            content += "■ MELCHIOR(科学者):\n"
             content += f"{self.melchior_responses['initial']}\n\n"
 
             # BALTHASAR
-            content += "■ BALTHASAR（母親）:\n"
+            content += "■ BALTHASAR(母親):\n"
             content += f"{self.balthasar_responses['initial']}\n\n"
 
             # CASPER
-            content += "■ CASPER（女性）:\n"
+            content += "■ CASPER(女性):\n"
             content += f"{self.casper_responses['initial']}\n\n"
 
         elif self.current_phase.startswith("debate_"):
@@ -398,31 +410,35 @@ class DebatingMagiMessage(Static):
             content += f"【第二段階: 討論 (ラウンド {round_num})】\n\n"
 
             # MELCHIOR
-            content += "■ MELCHIOR（科学者）:\n"
+            content += "■ MELCHIOR(科学者):\n"
             content += f"{self.melchior_responses[self.current_phase]}\n\n"
 
             # BALTHASAR
-            content += "■ BALTHASAR（母親）:\n"
+            content += "■ BALTHASAR(母親):\n"
             content += f"{self.balthasar_responses[self.current_phase]}\n\n"
 
             # CASPER
-            content += "■ CASPER（女性）:\n"
+            content += "■ CASPER(女性):\n"
             content += f"{self.casper_responses[self.current_phase]}\n\n"
 
         elif self.current_phase == "final":
             content += "【第三段階: 最終判断】\n\n"
 
             # MELCHIOR の最終見解
-            last_debate_phase = max([phase for phase in self.melchior_responses.keys() if phase.startswith("debate_")], default="initial")
-            content += "■ MELCHIOR（科学者）の最終見解:\n"
+            last_debate_phase = max(
+                [phase for phase in self.melchior_responses 
+                 if phase.startswith("debate_")], 
+                default="initial"
+            )
+            content += "■ MELCHIOR(科学者)の最終見解:\n"
             content += f"{self.melchior_responses[last_debate_phase]}\n\n"
 
             # BALTHASAR の最終見解
-            content += "■ BALTHASAR（母親）の最終見解:\n"
+            content += "■ BALTHASAR(母親)の最終見解:\n"
             content += f"{self.balthasar_responses[last_debate_phase]}\n\n"
 
             # CASPER の最終見解
-            content += "■ CASPER（女性）の最終見解:\n"
+            content += "■ CASPER(女性)の最終見解:\n"
             content += f"{self.casper_responses[last_debate_phase]}\n\n"
 
             # 最終判断
@@ -561,7 +577,9 @@ class ChatArea(Container):
             message_area.scroll_end()
 
         # ストリーミングレスポンスを取得
-        async for response in self.chat_model.get_response_streaming(self.messages, update_magi_response):
+        async for _response in self.chat_model.get_response_streaming(
+            self.messages, update_magi_response
+        ):
             # すでにコールバックで処理されているので、ここでは何もしない
             pass
 
@@ -587,7 +605,9 @@ class ChatArea(Container):
             message_area.scroll_end()
 
         # 討論を含むストリーミングレスポンスを取得 (1ラウンドの討論)
-        async for response in self.chat_model.get_response_with_debate(self.messages, update_magi_response, debate_rounds=1):
+        async for _response in self.chat_model.get_response_with_debate(
+            self.messages, update_magi_response, debate_rounds=1
+        ):
             # すでにコールバックで処理されているので、ここでは何もしない
             pass
 
