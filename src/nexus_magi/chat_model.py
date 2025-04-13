@@ -9,7 +9,6 @@ from typing import Any
 import requests
 from langgraph.graph import END, StateGraph
 
-
 # HTTPステータスコード
 HTTP_OK = 200
 
@@ -298,7 +297,7 @@ class ChatModel:
         return result["final_response"]
 
     async def get_response_streaming(
-        self, messages: list[dict[str, str]], 
+        self, messages: list[dict[str, str]],
         callback: Callable[[str, str], None] | None = None
     ) -> AsyncGenerator[dict[str, str], None]:
         """会話履歴を元に次の応答を生成し、結果をストリーミングで返す.
@@ -393,8 +392,8 @@ class ChatModel:
         return state
 
     async def get_response_with_debate(
-        self, messages: list[dict[str, str]], 
-        callback: Callable[[str, str, str], None] | None = None, 
+        self, messages: list[dict[str, str]],
+        callback: Callable[[str, str, str], None] | None = None,
         debate_rounds: int = 1
     ) -> AsyncGenerator[dict[str, str], None]:
         """会話履歴を元に次の応答を生成し、MAGIシステム間で討論を行った上で結果を返す.
@@ -428,7 +427,11 @@ class ChatModel:
         )
         if callback:
             await callback("balthasar", balthasar_response, "initial")
-        yield {"system": "balthasar", "response": balthasar_response, "phase": "initial"}
+        yield {
+            "system": "balthasar",
+            "response": balthasar_response,
+            "phase": "initial"
+        }
 
         # CASPER(女性)の初期応答
         state = await self._get_magi_response(state, MagiSystem.CASPER)
@@ -478,10 +481,13 @@ class ChatModel:
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
-            def _call_melchior_api(api_type: str, messages: list[dict[str, str]]) -> str:
+            def _call_melchior_api(
+                api_type: str,
+                messages_local: list[dict[str, str]]
+            ) -> str:
                 if api_type == "ollama":
-                    return self._call_ollama_api(messages)
-                return self._call_litellm_api(messages)
+                    return self._call_ollama_api(messages_local)
+                return self._call_litellm_api(messages_local)
 
             melchior_debate_response = await asyncio.get_event_loop().run_in_executor(
                 None,
@@ -490,7 +496,11 @@ class ChatModel:
 
             melchior_final = melchior_debate_response
             if callback:
-                await callback("melchior", melchior_debate_response, f"debate_{round_num+1}")
+                await callback(
+                    "melchior",
+                    melchior_debate_response,
+                    f"debate_{round_num+1}"
+                )
             yield {
                 "system": "melchior",
                 "response": melchior_debate_response,
@@ -510,10 +520,13 @@ class ChatModel:
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
-            def _call_balthasar_api(api_type: str, messages: list[dict[str, str]]) -> str:
+            def _call_balthasar_api(
+                api_type: str,
+                messages_local: list[dict[str, str]]
+            ) -> str:
                 if api_type == "ollama":
-                    return self._call_ollama_api(messages)
-                return self._call_litellm_api(messages)
+                    return self._call_ollama_api(messages_local)
+                return self._call_litellm_api(messages_local)
 
             balthasar_debate_response = await asyncio.get_event_loop().run_in_executor(
                 None,
@@ -522,7 +535,11 @@ class ChatModel:
 
             balthasar_final = balthasar_debate_response
             if callback:
-                await callback("balthasar", balthasar_debate_response, f"debate_{round_num+1}")
+                await callback(
+                    "balthasar",
+                    balthasar_debate_response,
+                    f"debate_{round_num+1}"
+                )
             yield {
                 "system": "balthasar",
                 "response": balthasar_debate_response,
@@ -542,18 +559,26 @@ class ChatModel:
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
-            def _call_casper_api(api_type: str, messages: list[dict[str, str]]) -> str:
+            def _call_casper_api(
+                api_type: str,
+                messages_local: list[dict[str, str]]
+            ) -> str:
                 if api_type == "ollama":
-                    return self._call_ollama_api(messages)
-                return self._call_litellm_api(messages)
+                    return self._call_ollama_api(messages_local)
+                return self._call_litellm_api(messages_local)
 
             casper_debate_response = await asyncio.get_event_loop().run_in_executor(
-                None, lambda: _call_casper_api(self.api_type, casper_debate_messages)
+                None,
+                lambda: _call_casper_api(self.api_type, casper_debate_messages)
             )
 
             casper_final = casper_debate_response
             if callback:
-                await callback("casper", casper_debate_response, f"debate_{round_num+1}")
+                await callback(
+                    "casper",
+                    casper_debate_response,
+                    f"debate_{round_num+1}"
+                )
             yield {
                 "system": "casper",
                 "response": casper_debate_response,

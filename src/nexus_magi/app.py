@@ -168,18 +168,36 @@ class MagiSystemMessage(Static):
 
         # MELCHIOR
         melchior_class = "" if self.melchior_response != "応答待ち..." else " waiting"
-        content += f"[b class='header melchior{melchior_class}']■ MELCHIOR（科学者）:[/b]\n"
-        content += f"[span class='melchior{melchior_class}']{self.melchior_response}[/span]\n\n"
+        content += (
+            f"[b class='header melchior{melchior_class}']■ MELCHIOR"
+            f"（科学者）:[/b]\n"
+        )
+        content += (
+            f"[span class='melchior{melchior_class}']"
+            f"{self.melchior_response}[/span]\n\n"
+        )
 
         # BALTHASAR
         balthasar_class = "" if self.balthasar_response != "応答待ち..." else " waiting"
-        content += f"[b class='header balthasar{balthasar_class}']■ BALTHASAR（母親）:[/b]\n"
-        content += f"[span class='balthasar{balthasar_class}']{self.balthasar_response}[/span]\n\n"
+        content += (
+            f"[b class='header balthasar{balthasar_class}']■ BALTHASAR"
+            f"（母親）:[/b]\n"
+        )
+        content += (
+            f"[span class='balthasar{balthasar_class}']"
+            f"{self.balthasar_response}[/span]\n\n"
+        )
 
         # CASPER
         casper_class = "" if self.casper_response != "応答待ち..." else " waiting"
-        content += f"[b class='header casper{casper_class}']■ CASPER（女性）:[/b]\n"
-        content += f"[span class='casper{casper_class}']{self.casper_response}[/span]\n\n"
+        content += (
+            f"[b class='header casper{casper_class}']■ CASPER"
+            f"（女性）:[/b]\n"
+        )
+        content += (
+            f"[span class='casper{casper_class}']"
+            f"{self.casper_response}[/span]\n\n"
+        )
 
         # 全てのシステムから回答があれば最終判断を表示
         if self.consensus_response:
@@ -337,18 +355,18 @@ class DebatingMagiMessage(Static):
 
         # 各システムの状態を初期化(フェーズごと)
         self.melchior_responses = {
-            "initial": "応答待ち...", 
-            "debate_1": "", 
+            "initial": "応答待ち...",
+            "debate_1": "",
             "final": ""
         }
         self.balthasar_responses = {
-            "initial": "応答待ち...", 
-            "debate_1": "", 
+            "initial": "応答待ち...",
+            "debate_1": "",
             "final": ""
         }
         self.casper_responses = {
-            "initial": "応答待ち...", 
-            "debate_1": "", 
+            "initial": "応答待ち...",
+            "debate_1": "",
             "final": ""
         }
         self.consensus_response = ""
@@ -359,7 +377,9 @@ class DebatingMagiMessage(Static):
         # 初期表示を設定
         self._update_content()
 
-    def update_response(self, system: str, response: str, phase: str = "initial") -> None:
+    def update_response(
+        self, system: str, response: str, phase: str = "initial"
+    ) -> None:
         """指定したシステムの応答を更新する.
 
         Args:
@@ -426,8 +446,8 @@ class DebatingMagiMessage(Static):
 
             # MELCHIOR の最終見解
             last_debate_phase = max(
-                [phase for phase in self.melchior_responses 
-                 if phase.startswith("debate_")], 
+                [phase for phase in self.melchior_responses
+                 if phase.startswith("debate_")],
                 default="initial"
             )
             content += "■ MELCHIOR(科学者)の最終見解:\n"
@@ -540,7 +560,10 @@ class ChatArea(Container):
         self.query_one("#message-input").focus()
 
         # 初期メッセージを表示するのだ
-        self.add_message("こんにちは！ぼくはずんだもんなのだ。どうしたのだ？", "assistant")
+        self.add_message(
+            "こんにちは！ぼくはずんだもんなのだ。どうしたのだ？",
+            "assistant"
+        )
 
     def add_message(self, message: str, role: str) -> None:
         """新しいメッセージを追加する.
