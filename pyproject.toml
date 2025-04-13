@@ -9,10 +9,10 @@ urls = { repository = "https://github.com/iimuz/nexus-magi" }
 version = "1.0.0"
 
 dependencies = [
-    "langgraph>=0.0.20",
-    "textual>=0.52.1",
-    "litellm>=1.33.1",
-    "requests>=2.31.0",
+  "langgraph>=0.0.20",
+  "textual>=0.52.1",
+  "litellm>=1.33.1",
+  "requests>=2.31.0",
 ]
 
 [project.scripts]
