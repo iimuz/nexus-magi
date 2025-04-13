@@ -60,7 +60,7 @@ class Message(Static):
     }
     """
 
-    def __init__(self, message: str, role: str, **kwargs) -> None:
+    def __init__(self, message: str, role: str, **kwargs: dict[str, Any]) -> None:
         """メッセージウィジェットを初期化する。
 
         Args:
@@ -125,7 +125,7 @@ class MagiSystemMessage(Static):
     }
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: dict[str, Any]) -> None:
         """MAGIシステムのメッセージウィジェットを初期化する."""
         super().__init__("", **kwargs)
         self.add_class("assistant")
@@ -227,7 +227,7 @@ class SimpleMagiMessage(Static):
     }
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: dict[str, Any]) -> None:
         """シンプルMAGIシステムのメッセージウィジェットを初期化する."""
         super().__init__("", **kwargs)
         self.add_class("assistant")

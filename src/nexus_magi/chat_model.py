@@ -483,7 +483,7 @@ class ChatModel:
             # キャプチャした変数を使用するために別の関数を定義
             def _call_melchior_api(
                 api_type: str,
-                messages_local: list[dict[str, str]]
+                messages_local: list[dict[str, Any]]
             ) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages_local)
@@ -522,7 +522,7 @@ class ChatModel:
             # キャプチャした変数を使用するために別の関数を定義
             def _call_balthasar_api(
                 api_type: str,
-                messages_local: list[dict[str, str]]
+                messages_local: list[dict[str, Any]]
             ) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages_local)
@@ -561,7 +561,7 @@ class ChatModel:
             # キャプチャした変数を使用するために別の関数を定義
             def _call_casper_api(
                 api_type: str,
-                messages_local: list[dict[str, str]]
+                messages_local: list[dict[str, Any]]
             ) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages_local)
@@ -615,7 +615,7 @@ class ChatModel:
         ]
 
         # キャプチャした変数を使用するために別の関数を定義
-        def _call_consensus_api(api_type: str, messages: list[dict[str, str]]) -> str:
+        def _call_consensus_api(api_type: str, messages: list[dict[str, Any]]) -> str:
             if api_type == "ollama":
                 return self._call_ollama_api(messages)
             return self._call_litellm_api(messages)
