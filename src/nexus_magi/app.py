@@ -578,13 +578,8 @@ class ChatArea(Container):
         message_area.mount(Message(message, role))
         message_area.scroll_end()
 
-    async def get_ai_response_streaming(self, user_message: str) -> None:
-        """AIからの応答をストリーミングで取得して表示.
-
-        Args:
-            user_message: ユーザーが入力したメッセージ
-
-        """
+    async def get_ai_response_streaming(self) -> None:
+        """AIからの応答をストリーミングで取得して表示."""
         # MAGIシステムメッセージを作成
         message_area = self.query_one("#message-area")
         magi_message = SimpleMagiMessage()
@@ -606,13 +601,8 @@ class ChatArea(Container):
             # すでにコールバックで処理されているので、ここでは何もしない
             pass
 
-    async def get_ai_response_with_debate(self, user_message: str) -> None:
-        """AIからの応答をストリーミングで取得し、討論を行った上で表示する.
-
-        Args:
-            user_message: ユーザーが入力したメッセージ
-
-        """
+    async def get_ai_response_with_debate(self) -> None:
+        """AIからの応答をストリーミングで取得し、討論を行った上で表示する."""
         # 討論機能付きのMAGIシステムメッセージを作成
         message_area = self.query_one("#message-area")
         magi_message = DebatingMagiMessage()
@@ -649,7 +639,7 @@ class ChatArea(Container):
         input_widget.value = ""
 
         # 討論機能を使ったLLMからの応答をストリーミングで取得するのだ
-        await self.get_ai_response_with_debate(message)
+        await self.get_ai_response_with_debate()
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         """入力が送信されたときの処理.
