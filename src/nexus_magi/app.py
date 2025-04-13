@@ -61,7 +61,7 @@ class Message(Static):
     """
 
     def __init__(self, message: str, role: str, **kwargs: dict[str, Any]) -> None:
-        """メッセージウィジェットを初期化する。
+        """メッセージウィジェットを初期化する.
 
         Args:
             message: 表示するメッセージ
@@ -348,7 +348,7 @@ class DebatingMagiMessage(Static):
     }
     """
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: dict[str, Any]) -> None:
         """討論機能付きMAGIシステムのメッセージウィジェットを初期化する."""
         super().__init__("", **kwargs)
         self.add_class("assistant")
@@ -512,7 +512,7 @@ class ChatArea(Container):
         provider: str = "ollama",
         api_base: str | None = None,
         model: str | None = None,
-        **kwargs: Any
+        **kwargs: dict[str, Any]
     ) -> None:
         """チャットエリアを初期化.
 
