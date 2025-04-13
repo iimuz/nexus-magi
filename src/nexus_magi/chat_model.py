@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+from collections.abc import AsyncGenerator
 from enum import Enum
 from typing import Any
 
@@ -175,7 +176,7 @@ class ChatModel:
         # システムメッセージがあれば更新、なければ追加
         system_msg_found = False
         for i, msg in enumerate(new_messages):
-            if msg["role"] == "system":
+            if (msg["role"] == "system"):
                 new_messages[i] = {
                     "role": "system",
                     "content": (
@@ -293,8 +294,8 @@ class ChatModel:
         return result["final_response"]
 
     async def get_response_streaming(
-        self, messages: list[dict[str, str]], callback=None
-    ):
+        self, messages: list[dict[str, str]], callback: Any | None = None
+    ) -> AsyncGenerator[dict[str, str], None]:
         """会話履歴を元に次の応答を生成し、結果をストリーミングで返す.
 
         Args:
@@ -349,7 +350,9 @@ class ChatModel:
             await callback("consensus", final_response)
         yield {"system": "consensus", "response": final_response}
 
-    async def _get_magi_response(self, state, magi_type: MagiSystem):
+    async def _get_magi_response(
+        self, state: dict[str, Any], magi_type: MagiSystem
+    ) -> dict[str, Any]:
         """指定したMAGIシステムの応答を非同期で取得する.
 
         Args:
@@ -385,8 +388,8 @@ class ChatModel:
         return state
 
     async def get_response_with_debate(
-        self, messages: list[dict[str, str]], callback=None, debate_rounds: int = 1
-    ):
+        self, messages: list[dict[str, str]], callback: Any | None = None, debate_rounds: int = 1
+    ) -> AsyncGenerator[dict[str, str], None]:
         """会話履歴を元に次の応答を生成し、MAGIシステム間で討論を行った上で結果を返す.
 
         Args:
@@ -468,13 +471,14 @@ class ChatModel:
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
-            def _call_melchior_api(api_type, messages):
+            def _call_melchior_api(api_type: str, messages: list[dict[str, str]]) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages)
                 return self._call_litellm_api(messages)
 
             melchior_debate_response = await asyncio.get_event_loop().run_in_executor(
-                None, lambda: _call_melchior_api(self.api_type, melchior_debate_messages)
+                None,
+                lambda: _call_melchior_api(self.api_type, melchior_debate_messages)
             )
 
             melchior_final = melchior_debate_response
@@ -499,13 +503,14 @@ class ChatModel:
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
-            def _call_balthasar_api(api_type, messages):
+            def _call_balthasar_api(api_type: str, messages: list[dict[str, str]]) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages)
                 return self._call_litellm_api(messages)
 
             balthasar_debate_response = await asyncio.get_event_loop().run_in_executor(
-                None, lambda: _call_balthasar_api(self.api_type, balthasar_debate_messages)
+                None,
+                lambda: _call_balthasar_api(self.api_type, balthasar_debate_messages)
             )
 
             balthasar_final = balthasar_debate_response
@@ -530,7 +535,7 @@ class ChatModel:
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
-            def _call_casper_api(api_type, messages):
+            def _call_casper_api(api_type: str, messages: list[dict[str, str]]) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages)
                 return self._call_litellm_api(messages)
@@ -578,7 +583,7 @@ class ChatModel:
         ]
 
         # キャプチャした変数を使用するために別の関数を定義
-        def _call_consensus_api(api_type, messages):
+        def _call_consensus_api(api_type: str, messages: list[dict[str, str]]) -> str:
             if api_type == "ollama":
                 return self._call_ollama_api(messages)
             return self._call_litellm_api(messages)

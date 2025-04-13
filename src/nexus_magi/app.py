@@ -471,7 +471,13 @@ class ChatArea(Container):
 
     messages = reactive([])
 
-    def __init__(self, provider: str = "ollama", api_base: str = None, model: str = None, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        provider: str = "ollama",
+        api_base: str | None = None,
+        model: str | None = None,
+        **kwargs: Any
+    ) -> None:
         """チャットエリアを初期化.
 
         Args:
@@ -547,8 +553,10 @@ class ChatArea(Container):
         message_area.scroll_end()
 
         # 各MAGIシステムからの応答をストリーミングで処理
-        async def update_magi_response(system, response):
-            """各MAGIシステムの応答を受け取るコールバック関数"""
+        async def update_magi_response(
+            system: str, response: str
+        ) -> None:
+            """各MAGIシステムの応答を受け取るコールバック関数."""
             magi_message.update_response(system, response)
             message_area.scroll_end()
 
@@ -571,8 +579,10 @@ class ChatArea(Container):
         message_area.scroll_end()
 
         # 各MAGIシステムからの応答をストリーミングで処理するコールバック
-        async def update_magi_response(system, response, phase):
-            """各MAGIシステムの応答を受け取るコールバック関数"""
+        async def update_magi_response(
+            system: str, response: str, phase: str
+        ) -> None:
+            """各MAGIシステムの応答を受け取るコールバック関数."""
             magi_message.update_response(system, response, phase)
             message_area.scroll_end()
 
@@ -619,7 +629,12 @@ class ChatApp(App):
     }
     """
 
-    def __init__(self, provider: str = "ollama", api_base: str = None, model: str = None):
+    def __init__(
+        self,
+        provider: str = "ollama",
+        api_base: str | None = None,
+        model: str | None = None
+    ) -> None:
         """チャットアプリケーションを初期化.
 
         Args:
