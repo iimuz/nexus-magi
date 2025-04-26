@@ -6,7 +6,9 @@
 
 - 複数の視点（MELCHIOR:科学者、BALTHASAR:母親、CASPER:女性）からの回答生成
 - 視点間での討論機能によるより深い回答
-- テキストベースのTUIインターフェイス（[Textual](https://github.com/Textualize/textual)使用）
+- フロントエンド（React）とバックエンド（FastAPI）の分離アーキテクチャ
+- モダンなWeb UIインターフェイス
+- WebSocketを活用したリアルタイムストリーミング応答
 - ローカルLLM対応（[Ollama](https://ollama.com/)または[LiteLLM](https://github.com/BerriAI/litellm)経由）
 - [langgraph](https://github.com/langchain-ai/langgraph)を使用したワークフロー管理
 
@@ -15,6 +17,7 @@
 ### 必要条件
 
 - Python 3.11以上
+- Node.js 18以上
 - ローカルLLMサーバー（OllamaまたはLiteLLM）
 
 ### インストール方法
@@ -26,21 +29,26 @@ git clone https://github.com/iimuz/nexus-magi.git
 cd nexus-magi
 ```
 
-2. 仮想環境を作成（任意）
+2. バックエンドのセットアップ
 
 ```bash
+# 仮想環境を作成（任意）
 python -m venv .venv
 source .venv/bin/activate  # Linuxの場合
 # または
 .venv\Scripts\activate  # Windowsの場合
-```
 
-3. パッケージのインストール
-
-```bash
+# パッケージのインストール
 pip install -e .  # 開発モードでインストール
 # または
 pip install -e ".[dev]"  # 開発ツールを含めてインストール
+```
+
+3. フロントエンドのセットアップ
+
+```bash
+cd frontend
+npm install
 ```
 
 4. LLMサーバーの準備
@@ -54,31 +62,60 @@ ollama pull phi4-mini
 
 ## 実行方法
 
-アプリケーションを起動：
+### バックエンドAPIサーバーの起動
 
 ```bash
 # パッケージとしてインストールした場合
 nexus-magi
 
 # または直接モジュールを実行
-python -m nexus_magi
+python -m src.nexus_magi
+
+# ポートやホストの指定
+python -m src.nexus_magi --port 8080 --host 127.0.0.1
+
+# 使用するLLMの指定
+python -m src.nexus_magi --model phi3-mini --api-type litellm --api-base http://localhost:4000
+```
+
+### フロントエンドの起動
+
+```bash
+cd frontend
+npm start
+
+# カスタムAPIエンドポイントを指定する場合
+REACT_APP_API_BASE_URL=http://localhost:8080 npm start
 ```
 
 ### 設定オプション
 
-アプリケーションは以下の設定で動作します：
+バックエンドAPIは以下の設定で動作します：
 
 - デフォルトAPI: `http://localhost:11434/api`（Ollama API）
 - デフォルトモデル: `phi4-mini`
 - API種類: `ollama`（または`litellm`）
 
-これらの設定は`chat_model.py`内で変更できます。
-
 ## 使用方法
 
-1. アプリケーションを起動するとチャットインターフェースが表示されます
-2. メッセージを入力すると、MAGIシステムの各視点からの回答が順次表示されます
-3. 討論機能により、異なる視点からの意見交換と最終的な合議結果が表示されます
+1. バックエンドAPIサーバーとフロントエンドを起動します
+2. ブラウザで `http://localhost:3000` にアクセスするとチャットインターフェースが表示されます
+3. メッセージを入力すると、MAGIシステムの各視点からの回答が順次表示されます
+4. 討論機能により、異なる視点からの意見交換と最終的な合議結果が表示されます
+
+## アーキテクチャ
+
+プロジェクトは以下の2つの主要コンポーネントで構成されています：
+
+1. **バックエンド（FastAPI）**
+   - RESTful APIとWebSocketエンドポイントを提供
+   - LLMとの連携処理
+   - MAGI合議システムのビジネスロジック
+
+2. **フロントエンド（React）**
+   - モダンなWeb UIインターフェース
+   - WebSocketを通じたリアルタイム通信
+   - Material UIを使用したレスポンシブデザイン
 
 ## 開発者向け情報
 
