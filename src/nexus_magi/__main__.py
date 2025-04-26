@@ -1,9 +1,9 @@
-"""チャットするためのエントリポイント."""
+"""チャットAPIサーバーのエントリポイント."""
 
 import argparse
 import sys
 
-from nexus_magi.app import ChatApp
+from src.nexus_magi.app import run_app
 
 
 def parse_args() -> argparse.Namespace:
@@ -13,22 +13,35 @@ def parse_args() -> argparse.Namespace:
         argparse.Namespace: 解析された引数
 
     """
-    parser = argparse.ArgumentParser(description="ずんだもんとチャットするのだ!")
+    parser = argparse.ArgumentParser(description="MAGI合議システムAPIサーバー")
     parser.add_argument(
-        "--provider",
+        "--host",
+        type=str,
+        default="0.0.0.0",
+        help="サーバーのホスト (デフォルト: 0.0.0.0)"
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="サーバーのポート (デフォルト: 8000)"
+    )
+    parser.add_argument(
+        "--api-type",
         type=str,
         default="ollama",
         choices=["ollama", "litellm"],
-        help="使用するLLMプロバイダー (ollama または litellm) (デフォルト: ollama)"
+        help="使用するLLM APIの種類 (ollama または litellm) (デフォルト: ollama)"
     )
     parser.add_argument(
         "--api-base",
         type=str,
-        help="APIサーバーのベースURL (デフォルト: ollamaの場合はhttp://localhost:11434/api、litellmの場合はhttp://localhost:8000)"
+        help="LLM APIのベースURL (デフォルト: ollamaの場合はhttp://localhost:11434/api、litellmの場合はhttp://localhost:4000)"
     )
     parser.add_argument(
         "--model",
         type=str,
+        default="phi4-mini",
         help="使用するモデル名 (デフォルト: phi4-mini)"
     )
     return parser.parse_args()
@@ -42,12 +55,13 @@ def main() -> int:
 
     """
     args = parse_args()
-    app = ChatApp(
-        provider=args.provider,
+    run_app(
+        host=args.host,
+        port=args.port,
         api_base=args.api_base,
         model=args.model,
+        api_type=args.api_type,
     )
-    app.run()
     return 0
 
 
