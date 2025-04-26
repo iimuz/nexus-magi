@@ -489,9 +489,10 @@ class ChatModel:
                     return self._call_ollama_api(messages_local)
                 return self._call_litellm_api(messages_local)
 
+            # ラムダ内で明示的に変数を渡して、適切にバインドします
             melchior_debate_response = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda: _call_melchior_api(self.api_type, melchior_debate_messages)
+                lambda messages=melchior_debate_messages: _call_melchior_api(self.api_type, messages)
             )
 
             melchior_final = melchior_debate_response
@@ -528,9 +529,10 @@ class ChatModel:
                     return self._call_ollama_api(messages_local)
                 return self._call_litellm_api(messages_local)
 
+            # ラムダ内で明示的に変数を渡して、適切にバインドします
             balthasar_debate_response = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda: _call_balthasar_api(self.api_type, balthasar_debate_messages)
+                lambda messages=balthasar_debate_messages: _call_balthasar_api(self.api_type, messages)
             )
 
             balthasar_final = balthasar_debate_response
@@ -567,9 +569,10 @@ class ChatModel:
                     return self._call_ollama_api(messages_local)
                 return self._call_litellm_api(messages_local)
 
+            # ラムダ内で明示的に変数を渡して、適切にバインドします
             casper_debate_response = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda: _call_casper_api(self.api_type, casper_debate_messages)
+                lambda messages=casper_debate_messages: _call_casper_api(self.api_type, messages)
             )
 
             casper_final = casper_debate_response
@@ -621,7 +624,7 @@ class ChatModel:
             return self._call_litellm_api(messages)
 
         consensus_response = await asyncio.get_event_loop().run_in_executor(
-            None, lambda: _call_consensus_api(self.api_type, consensus_messages)
+            None, lambda messages=consensus_messages: _call_consensus_api(self.api_type, messages)
         )
 
         # 最終的な合議結果
