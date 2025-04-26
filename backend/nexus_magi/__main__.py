@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from src.nexus_magi.app import run_app
+from nexus_magi.app import run_app
 
 
 def parse_args() -> argparse.Namespace:

@@ -32,6 +32,9 @@ cd nexus-magi
 2. バックエンドのセットアップ
 
 ```bash
+# バックエンドディレクトリに移動
+cd backend
+
 # 仮想環境を作成（任意）
 python -m venv .venv
 source .venv/bin/activate  # Linuxの場合
@@ -47,6 +50,9 @@ pip install -e ".[dev]"  # 開発ツールを含めてインストール
 3. フロントエンドのセットアップ
 
 ```bash
+# プロジェクトルートに戻る（必要に応じて）
+cd ..
+# フロントエンドディレクトリに移動
 cd frontend
 npm install
 ```
@@ -65,17 +71,20 @@ ollama pull phi4-mini
 ### バックエンドAPIサーバーの起動
 
 ```bash
+# バックエンドディレクトリに移動
+cd backend
+
 # パッケージとしてインストールした場合
 nexus-magi
 
 # または直接モジュールを実行
-python -m src.nexus_magi
+python -m nexus_magi
 
 # ポートやホストの指定
-python -m src.nexus_magi --port 8080 --host 127.0.0.1
+python -m nexus_magi --port 8080 --host 127.0.0.1
 
 # 使用するLLMの指定
-python -m src.nexus_magi --model phi3-mini --api-type litellm --api-base http://localhost:4000
+python -m nexus_magi --model phi3-mini --api-type litellm --api-base http://localhost:4000
 ```
 
 ### フロントエンドの起動
@@ -145,23 +154,27 @@ pip install -e ".[dev]"
 
 ```bash
 ruff check .
-mypy src
+mypy backend
 ```
 
 ### プロジェクト構造
 
 ```
 /
-├── src/             # ソースコード
-│   └── nexus_magi/  # メインパッケージ
-│       ├── __init__.py
-│       ├── __main__.py  # エントリーポイント
-│       ├── app.py       # TUIアプリケーション
-│       └── chat_model.py # LLM連携機能
-├── memory-bank/     # プロジェクト関連ドキュメント
-├── pyproject.toml   # Python設定
-├── setup.cfg        # Python設定
-└── setup.py         # Pythonパッケージ設定
+├── backend/           # バックエンドコード
+│   ├── nexus_magi/    # メインパッケージ
+│   ├── pyproject.toml # バックエンド用Python設定
+│   ├── setup.cfg      # バックエンド用Python設定
+│   └── setup.py       # バックエンド用Pythonパッケージ設定
+├── frontend/          # フロントエンドコード
+│   ├── package.json   # フロントエンド依存関係
+│   ├── public/        # 静的ファイル
+│   └── src/           # フロントエンドソースコード
+├── dprint.json        # dprint設定
+├── mise.toml          # mise設定
+├── package.json       # プロジェクト依存関係
+├── memory-bank/       # プロジェクト関連ドキュメント
+└── LICENSE            # ライセンスファイル
 ```
 
 ## ライセンス

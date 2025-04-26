@@ -5,7 +5,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from src.nexus_magi.chat_model import ChatModel
+from nexus_magi.chat_model import ChatModel
 
 # グローバル設定変数
 _API_BASE = "http://localhost:11434/api"  # デフォルト値を設定
