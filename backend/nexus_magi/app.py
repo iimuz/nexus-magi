@@ -1,6 +1,5 @@
 """チャットAPIサーバーを定義するモジュール."""
 
-
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -11,6 +10,7 @@ from nexus_magi.chat_model import ChatModel
 _API_BASE = "http://localhost:11434/api"  # デフォルト値を設定
 _MODEL = "phi4-mini"  # デフォルト値を設定
 _API_TYPE = "ollama"
+
 
 class ChatMessage(BaseModel):
     """チャットメッセージのモデル."""
@@ -88,11 +88,7 @@ async def chat(request: ChatRequest):
     api_base = _API_BASE or "http://localhost:11434/api"  # デフォルト値を保証
     model = _MODEL or "phi4-mini"  # デフォルト値を保証
 
-    chat_model = ChatModel(
-        api_base=api_base,
-        model=model,
-        api_type=_API_TYPE
-    )
+    chat_model = ChatModel(api_base=api_base, model=model, api_type=_API_TYPE)
     messages = format_messages(request.messages)
 
     # 通常の応答（非ストリーミング）
@@ -118,11 +114,7 @@ async def websocket_endpoint(websocket: WebSocket):
             api_base = _API_BASE or "http://localhost:11434/api"  # デフォルト値を保証
             model = _MODEL or "phi4-mini"  # デフォルト値を保証
 
-            chat_model = ChatModel(
-                api_base=api_base,
-                model=model,
-                api_type=_API_TYPE
-            )
+            chat_model = ChatModel(api_base=api_base, model=model, api_type=_API_TYPE)
 
             if request.debate:
                 # 討論モードの場合
@@ -131,7 +123,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     response_data = {
                         "system": system,
                         "response": response,
-                        "phase": phase
+                        "phase": phase,
                     }
                     print(f"クライアントに送信するデータ (討論モード): {response_data}")
                     await websocket.send_json(response_data)
@@ -151,9 +143,11 @@ async def websocket_endpoint(websocket: WebSocket):
                     response_data = {
                         "system": system,
                         "response": response,
-                        "phase": "initial"  # 互換性のためにphaseを追加
+                        "phase": "initial",  # 互換性のためにphaseを追加
                     }
-                    print(f"クライアントに送信するデータ (ストリームモード): {response_data}")
+                    print(
+                        f"クライアントに送信するデータ (ストリームモード): {response_data}"
+                    )
                     await websocket.send_json(response_data)
 
                 # ストリーミングレスポンスを生成
@@ -166,7 +160,11 @@ async def websocket_endpoint(websocket: WebSocket):
             else:
                 # 非ストリーミング、非討論モードの場合
                 response = await chat_model.get_response(messages)
-                response_data = {"system": "consensus", "response": response, "phase": "final"}
+                response_data = {
+                    "system": "consensus",
+                    "response": response,
+                    "phase": "final",
+                }
                 print(f"クライアントに送信するデータ (非ストリーム): {response_data}")
                 await websocket.send_json(response_data)
 
@@ -180,7 +178,7 @@ def run_app(
     port: int = 8000,
     api_base: str | None = None,
     model: str | None = None,
-    api_type: str = "ollama"
+    api_type: str = "ollama",
 ):
     """APIサーバーを実行する.
 

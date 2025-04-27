@@ -58,6 +58,7 @@ class ChatModel:
             StateGraph: 作成されたグラフ
 
         """
+
         # グラフの状態の型を定義するのだ
         class State(dict[str, Any]):
             """グラフの状態を表す型."""
@@ -119,9 +120,7 @@ class ChatModel:
             balthasar = state.get(
                 "balthasar_response", "レスポンスが取得できませんでした"
             )
-            casper = state.get(
-                "casper_response", "レスポンスが取得できませんでした"
-            )
+            casper = state.get("casper_response", "レスポンスが取得できませんでした")
 
             # 合議結果を作成する
             final_response = (
@@ -179,7 +178,7 @@ class ChatModel:
         # システムメッセージがあれば更新、なければ追加
         system_msg_found = False
         for i, msg in enumerate(new_messages):
-            if (msg["role"] == "system"):
+            if msg["role"] == "system":
                 new_messages[i] = {
                     "role": "system",
                     "content": (
@@ -290,15 +289,15 @@ class ChatModel:
         # 非同期で実行するために、ThreadPoolExecutorを使うのだ
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            None,
-            lambda: self.graph.invoke({"messages": messages})
+            None, lambda: self.graph.invoke({"messages": messages})
         )
 
         return result["final_response"]
 
     async def get_response_streaming(
-        self, messages: list[dict[str, str]],
-        callback: Callable[[str, str], None] | None = None
+        self,
+        messages: list[dict[str, str]],
+        callback: Callable[[str, str], None] | None = None,
     ) -> AsyncGenerator[dict[str, str], None]:
         """会話履歴を元に次の応答を生成し、結果をストリーミングで返す.
 
@@ -372,13 +371,11 @@ class ChatModel:
         loop = asyncio.get_event_loop()
         if self.api_type == "ollama":
             response = await loop.run_in_executor(
-                None,
-                lambda: self._call_ollama_api(messages)
+                None, lambda: self._call_ollama_api(messages)
             )
         else:  # litellm
             response = await loop.run_in_executor(
-                None,
-                lambda: self._call_litellm_api(messages)
+                None, lambda: self._call_litellm_api(messages)
             )
 
         # MAGIシステムに応じた応答を状態に追加
@@ -392,9 +389,10 @@ class ChatModel:
         return state
 
     async def get_response_with_debate(
-        self, messages: list[dict[str, str]],
+        self,
+        messages: list[dict[str, str]],
         callback: Callable[[str, str, str], None] | None = None,
-        debate_rounds: int = 1
+        debate_rounds: int = 1,
     ) -> AsyncGenerator[dict[str, str], None]:
         """会話履歴を元に次の応答を生成し、MAGIシステム間で討論を行った上で結果を返す.
 
@@ -430,7 +428,7 @@ class ChatModel:
         yield {
             "system": "balthasar",
             "response": balthasar_response,
-            "phase": "initial"
+            "phase": "initial",
         }
 
         # CASPER(女性)の初期応答
@@ -475,15 +473,14 @@ class ChatModel:
                     "content": (
                         f"あなたはMAGIシステムの{MagiSystem.MELCHIOR.value}です。"
                         f"{MagiPersonality.MELCHIOR.value}として回答してください。"
-                    )
+                    ),
                 },
-                {"role": "user", "content": debate_prompt}
+                {"role": "user", "content": debate_prompt},
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
             def _call_melchior_api(
-                api_type: str,
-                messages_local: list[dict[str, Any]]
+                api_type: str, messages_local: list[dict[str, Any]]
             ) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages_local)
@@ -492,20 +489,20 @@ class ChatModel:
             # ラムダ内で明示的に変数を渡して、適切にバインドします
             melchior_debate_response = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda messages=melchior_debate_messages: _call_melchior_api(self.api_type, messages)
+                lambda messages=melchior_debate_messages: _call_melchior_api(
+                    self.api_type, messages
+                ),
             )
 
             melchior_final = melchior_debate_response
             if callback:
                 await callback(
-                    "melchior",
-                    melchior_debate_response,
-                    f"debate_{round_num+1}"
+                    "melchior", melchior_debate_response, f"debate_{round_num + 1}"
                 )
             yield {
                 "system": "melchior",
                 "response": melchior_debate_response,
-                "phase": f"debate_{round_num+1}"
+                "phase": f"debate_{round_num + 1}",
             }
 
             # BALTHASARの討論
@@ -515,15 +512,14 @@ class ChatModel:
                     "content": (
                         f"あなたはMAGIシステムの{MagiSystem.BALTHASAR.value}です。"
                         f"{MagiPersonality.BALTHASAR.value}として回答してください。"
-                    )
+                    ),
                 },
-                {"role": "user", "content": debate_prompt}
+                {"role": "user", "content": debate_prompt},
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
             def _call_balthasar_api(
-                api_type: str,
-                messages_local: list[dict[str, Any]]
+                api_type: str, messages_local: list[dict[str, Any]]
             ) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages_local)
@@ -532,20 +528,20 @@ class ChatModel:
             # ラムダ内で明示的に変数を渡して、適切にバインドします
             balthasar_debate_response = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda messages=balthasar_debate_messages: _call_balthasar_api(self.api_type, messages)
+                lambda messages=balthasar_debate_messages: _call_balthasar_api(
+                    self.api_type, messages
+                ),
             )
 
             balthasar_final = balthasar_debate_response
             if callback:
                 await callback(
-                    "balthasar",
-                    balthasar_debate_response,
-                    f"debate_{round_num+1}"
+                    "balthasar", balthasar_debate_response, f"debate_{round_num + 1}"
                 )
             yield {
                 "system": "balthasar",
                 "response": balthasar_debate_response,
-                "phase": f"debate_{round_num+1}"
+                "phase": f"debate_{round_num + 1}",
             }
 
             # CASPERの討論
@@ -555,15 +551,14 @@ class ChatModel:
                     "content": (
                         f"あなたはMAGIシステムの{MagiSystem.CASPER.value}です。"
                         f"{MagiPersonality.CASPER.value}として回答してください。"
-                    )
+                    ),
                 },
-                {"role": "user", "content": debate_prompt}
+                {"role": "user", "content": debate_prompt},
             ]
 
             # キャプチャした変数を使用するために別の関数を定義
             def _call_casper_api(
-                api_type: str,
-                messages_local: list[dict[str, Any]]
+                api_type: str, messages_local: list[dict[str, Any]]
             ) -> str:
                 if api_type == "ollama":
                     return self._call_ollama_api(messages_local)
@@ -572,20 +567,20 @@ class ChatModel:
             # ラムダ内で明示的に変数を渡して、適切にバインドします
             casper_debate_response = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda messages=casper_debate_messages: _call_casper_api(self.api_type, messages)
+                lambda messages=casper_debate_messages: _call_casper_api(
+                    self.api_type, messages
+                ),
             )
 
             casper_final = casper_debate_response
             if callback:
                 await callback(
-                    "casper",
-                    casper_debate_response,
-                    f"debate_{round_num+1}"
+                    "casper", casper_debate_response, f"debate_{round_num + 1}"
                 )
             yield {
                 "system": "casper",
                 "response": casper_debate_response,
-                "phase": f"debate_{round_num+1}"
+                "phase": f"debate_{round_num + 1}",
             }
 
         # 最終的な合議結果を生成
@@ -612,9 +607,9 @@ class ChatModel:
             {
                 "role": "system",
                 "content": "あなたはMAGI合議システムです。3つのMAGIシステムの判断を"
-                "総合して最終的な結論を出してください。"
+                "総合して最終的な結論を出してください。",
             },
-            {"role": "user", "content": consensus_prompt}
+            {"role": "user", "content": consensus_prompt},
         ]
 
         # キャプチャした変数を使用するために別の関数を定義
@@ -624,7 +619,10 @@ class ChatModel:
             return self._call_litellm_api(messages)
 
         consensus_response = await asyncio.get_event_loop().run_in_executor(
-            None, lambda messages=consensus_messages: _call_consensus_api(self.api_type, messages)
+            None,
+            lambda messages=consensus_messages: _call_consensus_api(
+                self.api_type, messages
+            ),
         )
 
         # 最終的な合議結果

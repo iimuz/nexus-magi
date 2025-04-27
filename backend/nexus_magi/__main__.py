@@ -18,31 +18,28 @@ def parse_args() -> argparse.Namespace:
         "--host",
         type=str,
         default="0.0.0.0",
-        help="サーバーのホスト (デフォルト: 0.0.0.0)"
+        help="サーバーのホスト (デフォルト: 0.0.0.0)",
     )
     parser.add_argument(
-        "--port",
-        type=int,
-        default=8000,
-        help="サーバーのポート (デフォルト: 8000)"
+        "--port", type=int, default=8000, help="サーバーのポート (デフォルト: 8000)"
     )
     parser.add_argument(
         "--api-type",
         type=str,
         default="ollama",
         choices=["ollama", "litellm"],
-        help="使用するLLM APIの種類 (ollama または litellm) (デフォルト: ollama)"
+        help="使用するLLM APIの種類 (ollama または litellm) (デフォルト: ollama)",
     )
     parser.add_argument(
         "--api-base",
         type=str,
-        help="LLM APIのベースURL (デフォルト: ollamaの場合はhttp://localhost:11434/api、litellmの場合はhttp://localhost:4000)"
+        help="LLM APIのベースURL (デフォルト: ollamaの場合はhttp://localhost:11434/api、litellmの場合はhttp://localhost:4000)",
     )
     parser.add_argument(
         "--model",
         type=str,
         default="phi4-mini",
-        help="使用するモデル名 (デフォルト: phi4-mini)"
+        help="使用するモデル名 (デフォルト: phi4-mini)",
     )
     return parser.parse_args()
 
