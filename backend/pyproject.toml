@@ -1,26 +1,27 @@
 [project]
 authors = [{ name = "iimuz", email = "iz.primary.story+github@gmail.com" }]
 description = "LLM Agent application."
-license = { file = "LICENSE" }
 name = "nexus_magi"
-readme = "README.md"
 requires-python = ">=3.11"
 urls = { repository = "https://github.com/iimuz/nexus-magi" }
 version = "1.0.0"
 
 dependencies = [
-    "langgraph>=0.0.20",
-    "textual>=0.52.1",
-    "litellm>=1.33.1",
-    "requests>=2.31.0",
+  "langgraph>=0.0.20",
+  "textual>=0.52.1",
+  "litellm>=1.33.1",
+  "requests>=2.31.0",
+  "fastapi>=0.100.0",
+  "uvicorn>=0.22.0",
+  "websockets>=11.0.3",
+  "pydantic>=2.0.0",
 ]
 
 [project.scripts]
 nexus-magi = "nexus_magi.__main__:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
-
+where = ["."]
 [project.optional-dependencies]
 dev = [
   "mypy",
@@ -49,6 +50,8 @@ ignore = [
   # The following rules may cause conflicts when used with the formatter: `COM812`, `ISC001`.
   "COM812",
   "ISC001",
+  # `ノ` は日本語でコメントしているので無視する
+  "RUF003",
 ]
 select = ["ALL"]
 

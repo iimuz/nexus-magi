@@ -1,0 +1,7 @@
+[tools]
+python = "3.11"
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+mise.file = "../.env"
+VENV_DIR = ".venv"
