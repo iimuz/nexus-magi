@@ -22,6 +22,7 @@ class APIConfig:
             api_base: LLM APIのベースURL
             model: 使用するモデル名
             api_type: APIの種類("ollama"または"litellm")
+
         """
         self.api_base = api_base
         self.model = model
@@ -101,7 +102,7 @@ async def root() -> dict[str, str]:
     return {"message": "MAGI合議システム API"}
 
 
-@app.post("/api/chat", response_model=ChatResponse)
+@app.post("/api/chat")
 async def chat(request: ChatRequest) -> ChatResponse:
     """チャットエンドポイント."""
     # グローバル設定を使用してチャットモデルをインスタンス化
@@ -111,7 +112,6 @@ async def chat(request: ChatRequest) -> ChatResponse:
     chat_model = ChatModel(api_base=api_base, model=model, api_type=api_config.api_type)
     messages = format_messages(request.messages)
 
-    # 通常の応答(非ストリーミング)
     response = await chat_model.get_response(messages)
     return ChatResponse(response=response)
 
@@ -193,9 +193,9 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
 def run_app(
     host: str = "127.0.0.1",
     port: int = 8000,
-    api_base: str = None,
-    model: str = None,
-    api_type: str = None,
+    api_base: str | None = None,
+    model: str | None = None,
+    api_type: str | None = None,
 ) -> None:
     """APIサーバーを実行する.
 
@@ -205,6 +205,7 @@ def run_app(
         api_base: LLM APIのベースURL
         model: 使用するモデル名
         api_type: APIの種類("ollama"または"litellm")
+
     """
     import uvicorn
 
