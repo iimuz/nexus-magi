@@ -6,10 +6,30 @@ from pydantic import BaseModel
 
 from nexus_magi.chat_model import ChatModel
 
-# グローバル設定変数
-_API_BASE = "http://localhost:11434/api"  # デフォルト値を設定
-_MODEL = "phi4-mini"  # デフォルト値を設定
-_API_TYPE = "ollama"
+
+class APIConfig:
+    """APIの設定を管理するクラス."""
+
+    def __init__(
+        self,
+        api_base: str = "http://localhost:11434/api",
+        model: str = "phi4-mini",
+        api_type: str = "ollama",
+    ) -> None:
+        """APIConfigクラスを初期化.
+
+        Args:
+            api_base: LLM APIのベースURL
+            model: 使用するモデル名
+            api_type: APIの種類("ollama"または"litellm")
+        """
+        self.api_base = api_base
+        self.model = model
+        self.api_type = api_type
+
+
+# APIの設定
+api_config = APIConfig()
 
 
 class ChatMessage(BaseModel):
@@ -85,10 +105,10 @@ async def root() -> dict[str, str]:
 async def chat(request: ChatRequest) -> ChatResponse:
     """チャットエンドポイント."""
     # グローバル設定を使用してチャットモデルをインスタンス化
-    api_base = _API_BASE or "http://localhost:11434/api"  # デフォルト値を保証
-    model = _MODEL or "phi4-mini"  # デフォルト値を保証
+    api_base = api_config.api_base  # デフォルト値を保証
+    model = api_config.model  # デフォルト値を保証
 
-    chat_model = ChatModel(api_base=api_base, model=model, api_type=_API_TYPE)
+    chat_model = ChatModel(api_base=api_base, model=model, api_type=api_config.api_type)
     messages = format_messages(request.messages)
 
     # 通常の応答(非ストリーミング)
@@ -111,10 +131,10 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             messages = format_messages(request.messages)
 
             # グローバル設定を使用してチャットモデルをインスタンス化
-            api_base = _API_BASE or "http://localhost:11434/api"  # デフォルト値を保証
-            model = _MODEL or "phi4-mini"  # デフォルト値を保証
+            api_base = api_config.api_base  # デフォルト値を保証
+            model = api_config.model  # デフォルト値を保証
 
-            chat_model = ChatModel(api_base=api_base, model=model, api_type=_API_TYPE)
+            chat_model = ChatModel(api_base=api_base, model=model, api_type=api_config.api_type)
 
             if request.debate:
                 # 討論モードの場合
@@ -171,9 +191,9 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
 def run_app(
     host: str = "127.0.0.1",
     port: int = 8000,
-    api_base: str | None = None,
-    model: str | None = None,
-    api_type: str = "ollama",
+    api_base: str = None,
+    model: str = None,
+    api_type: str = None,
 ) -> None:
     """APIサーバーを実行する.
 
@@ -183,18 +203,16 @@ def run_app(
         api_base: LLM APIのベースURL
         model: 使用するモデル名
         api_type: APIの種類("ollama"または"litellm")
-
     """
     import uvicorn
 
-    # グローバル設定
-    # 以下の変数をグローバルとして使用する必要があります
-    global _API_BASE
-    global _MODEL
-    global _API_TYPE
-    _API_BASE = api_base or "http://localhost:11434/api"  # デフォルト値を保証
-    _MODEL = model or "phi4-mini"  # デフォルト値を保証
-    _API_TYPE = api_type
+    # グローバル設定を更新
+    if api_base is not None:
+        api_config.api_base = api_base
+    if model is not None:
+        api_config.model = model
+    if api_type is not None:
+        api_config.api_type = api_type
 
     # サーバー起動
     uvicorn.run(app, host=host, port=port)
