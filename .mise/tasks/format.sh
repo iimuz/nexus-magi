@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 #MISE description="Format."
 
-python -m ruff format
+echo "Format project files..."
 dprint fmt
 npx prettier --write "**/*.{yml,yaml}"
+
+echo "Format backend files..."
+cd backend
+  mise run format
+cd -

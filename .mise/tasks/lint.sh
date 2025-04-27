@@ -4,8 +4,10 @@
 set -eu
 set -o pipefail
 
-echo "Lint python files..."
-python -m ruff check .
+echo "Lint backend files..."
+cd backend
+  mise run lint
+cd -
 
 echo "Lint markdown files..."
 dprint check
