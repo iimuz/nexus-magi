@@ -406,8 +406,8 @@ class ChatModel:
             phase: 現在のフェーズ
 
         Returns:
-
             str: MAGIシステムの討論応答
+
         """
         debate_messages = [
             {
@@ -440,8 +440,8 @@ class ChatModel:
             messages: メッセージリスト
 
         Returns:
-
             str: API呼び出しの結果
+
         """
         if self.api_type == "ollama":
             return self._call_ollama_api(messages)
@@ -463,8 +463,8 @@ class ChatModel:
             casper_response: CASPERの応答
 
         Returns:
-
             str: 討論用のプロンプト
+
         """
         return f"""
 これまでの議論を踏まえて、あなたの立場から意見を改めて述べてください。
@@ -501,8 +501,8 @@ class ChatModel:
             casper_final: CASPERの最終応答
 
         Returns:
-
             str: 合議結果用のプロンプト
+
         """
         return f"""
 以下のMAGIシステム3つの分析結果に基づいて、最終的な判断を下してください。
@@ -539,8 +539,8 @@ class ChatModel:
             consensus_response: 合議システムの応答
 
         Returns:
-
             str: 最終的な合議結果
+
         """
         return (
             f"【MAGI合議システム - 討論結果】\n\n"
@@ -565,6 +565,7 @@ class ChatModel:
 
         Yields:
             dict: MAGIシステムの応答状態の更新
+
         """
         # 初期の状態
         state = {"messages": messages}
