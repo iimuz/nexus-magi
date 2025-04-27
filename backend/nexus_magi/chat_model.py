@@ -622,7 +622,7 @@ class ChatModel:
                 MagiPersonality.MELCHIOR,
                 debate_prompt,
                 callback,
-                phase
+                phase,
             )
             melchior_final = melchior_debate_response
             yield {
@@ -636,7 +636,7 @@ class ChatModel:
                 MagiPersonality.BALTHASAR,
                 debate_prompt,
                 callback,
-                phase
+                phase,
             )
             balthasar_final = balthasar_debate_response
             yield {
@@ -650,7 +650,7 @@ class ChatModel:
                 MagiPersonality.CASPER,
                 debate_prompt,
                 callback,
-                phase
+                phase,
             )
             casper_final = casper_debate_response
             yield {
