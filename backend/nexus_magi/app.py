@@ -134,7 +134,9 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             api_base = api_config.api_base  # デフォルト値を保証
             model = api_config.model  # デフォルト値を保証
 
-            chat_model = ChatModel(api_base=api_base, model=model, api_type=api_config.api_type)
+            chat_model = ChatModel(
+                api_base=api_base, model=model, api_type=api_config.api_type
+            )
 
             if request.debate:
                 # 討論モードの場合
