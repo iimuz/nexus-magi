@@ -17,8 +17,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--host",
         type=str,
-        default="0.0.0.0",
-        help="サーバーのホスト (デフォルト: 0.0.0.0)",
+        default="127.0.0.1",
+        help="サーバーのホスト (デフォルト: 127.0.0.1)",
     )
     parser.add_argument(
         "--port", type=int, default=8000, help="サーバーのポート (デフォルト: 8000)"

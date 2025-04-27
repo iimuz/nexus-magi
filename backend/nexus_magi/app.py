@@ -37,16 +37,16 @@ class ChatResponse(BaseModel):
 class ConnectionManager:
     """WebSocket接続を管理するクラス."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """WebSocket接続管理クラスを初期化."""
         self.active_connections: list[WebSocket] = []
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket) -> None:
         """WebSocket接続を確立."""
         await websocket.accept()
         self.active_connections.append(websocket)
 
-    def disconnect(self, websocket: WebSocket):
+    def disconnect(self, websocket: WebSocket) -> None:
         """WebSocket接続を切断."""
         self.active_connections.remove(websocket)
 
@@ -76,13 +76,13 @@ def format_messages(messages: list[ChatMessage]) -> list[dict[str, str]]:
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
     """ルートエンドポイント."""
     return {"message": "MAGI合議システム API"}
 
 
 @app.post("/api/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest) -> ChatResponse:
     """チャットエンドポイント."""
     # グローバル設定を使用してチャットモデルをインスタンス化
     api_base = _API_BASE or "http://localhost:11434/api"  # デフォルト値を保証
@@ -91,20 +91,20 @@ async def chat(request: ChatRequest):
     chat_model = ChatModel(api_base=api_base, model=model, api_type=_API_TYPE)
     messages = format_messages(request.messages)
 
-    # 通常の応答（非ストリーミング）
+    # 通常の応答(非ストリーミング)
     response = await chat_model.get_response(messages)
     return ChatResponse(response=response)
 
 
 @app.websocket("/api/chat/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket) -> None:
     """WebSocketエンドポイント."""
     await manager.connect(websocket)
     try:
         while True:
             # クライアントからのメッセージを待機
             data = await websocket.receive_json()
-            print(f"WebSocketから受信したデータ: {data}")
+            # WebSocketから受信したデータをログ出力
 
             # ChatRequestの形式に変換
             request = ChatRequest(**data)
@@ -118,18 +118,17 @@ async def websocket_endpoint(websocket: WebSocket):
 
             if request.debate:
                 # 討論モードの場合
-                async def send_update(system: str, response: str, phase: str):
+                async def send_update(system: str, response: str, phase: str) -> None:
                     """討論モードでの更新をクライアントに送信."""
                     response_data = {
                         "system": system,
                         "response": response,
                         "phase": phase,
                     }
-                    print(f"クライアントに送信するデータ (討論モード): {response_data}")
                     await websocket.send_json(response_data)
 
                 # 討論を含むストリーミングレスポンスを生成
-                async for response in chat_model.get_response_with_debate(
+                async for _response in chat_model.get_response_with_debate(
                     messages, send_update, debate_rounds=request.debate_rounds
                 ):
                     # すでにコールバックで処理されているので、ここでは何もしない
@@ -137,7 +136,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             elif request.stream:
                 # 通常のストリーミングモードの場合
-                async def send_update(system: str, response: str):
+                async def send_update(system: str, response: str) -> None:
                     """ストリーミングモードでの更新をクライアントに送信."""
                     # phaseパラメータを追加してフロントエンドとのインターフェースを統一
                     response_data = {
@@ -145,13 +144,10 @@ async def websocket_endpoint(websocket: WebSocket):
                         "response": response,
                         "phase": "initial",  # 互換性のためにphaseを追加
                     }
-                    print(
-                        f"クライアントに送信するデータ (ストリームモード): {response_data}"
-                    )
                     await websocket.send_json(response_data)
 
                 # ストリーミングレスポンスを生成
-                async for response in chat_model.get_response_streaming(
+                async for _response in chat_model.get_response_streaming(
                     messages, send_update
                 ):
                     # すでにコールバックで処理されているので、ここでは何もしない
@@ -165,7 +161,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     "response": response,
                     "phase": "final",
                 }
-                print(f"クライアントに送信するデータ (非ストリーム): {response_data}")
                 await websocket.send_json(response_data)
 
     except WebSocketDisconnect:
@@ -174,12 +169,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # アプリケーションを実行する関数
 def run_app(
-    host: str = "0.0.0.0",
+    host: str = "127.0.0.1",
     port: int = 8000,
     api_base: str | None = None,
     model: str | None = None,
     api_type: str = "ollama",
-):
+) -> None:
     """APIサーバーを実行する.
 
     Args:
@@ -193,7 +188,10 @@ def run_app(
     import uvicorn
 
     # グローバル設定
-    global _API_BASE, _MODEL, _API_TYPE
+    # 以下の変数をグローバルとして使用する必要があります
+    global _API_BASE
+    global _MODEL
+    global _API_TYPE
     _API_BASE = api_base or "http://localhost:11434/api"  # デフォルト値を保証
     _MODEL = model or "phi4-mini"  # デフォルト値を保証
     _API_TYPE = api_type

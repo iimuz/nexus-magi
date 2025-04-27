@@ -69,7 +69,7 @@ class ChatModel:
             casper_response: str | None = None
             final_response: str | None = None
 
-        # 各MAGIシステムのノードを定義するのだ
+        # 各MAGIシステムのノードを定義する
         def generate_melchior_response(state: State) -> State:
             """MELCHIOR: 科学者のように論理的・分析的に考えるシステム."""
             messages = self._add_system_instructions(
