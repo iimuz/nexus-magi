@@ -103,27 +103,6 @@ async def root() -> dict[str, str]:
     return {"message": "MAGI合議システム API"}
 
 
-@app.post("/api/chat")
-async def chat(request: ChatRequest) -> ChatResponse:
-    """チャットエンドポイント."""
-    # グローバル設定を使用
-    api_base = api_config.api_base
-    model = api_config.model
-    api_type = api_config.api_type
-
-    messages = format_messages(request.messages)
-
-    if request.debate:
-        # 討論モードの場合はDebateChatModelを使用
-        chat_model = DebateChatModel(api_base=api_base, model=model, api_type=api_type)
-    else:
-        # 通常モードの場合はSimpleChatModelを使用
-        chat_model = SimpleChatModel(api_base=api_base, model=model, api_type=api_type)
-
-    response = await chat_model.get_response(messages)
-    return ChatResponse(response=response)
-
-
 @app.websocket("/api/chat/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     """WebSocketエンドポイント."""
