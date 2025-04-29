@@ -4,7 +4,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from nexus_magi.chat_model import ChatModel
+from nexus_magi.debate_chat_model import DebateChatModel
+from nexus_magi.simple_chat_model import SimpleChatModel
 
 
 class APIConfig:
@@ -105,12 +106,19 @@ async def root() -> dict[str, str]:
 @app.post("/api/chat")
 async def chat(request: ChatRequest) -> ChatResponse:
     """チャットエンドポイント."""
-    # グローバル設定を使用してチャットモデルをインスタンス化
-    api_base = api_config.api_base  # デフォルト値を保証
-    model = api_config.model  # デフォルト値を保証
+    # グローバル設定を使用
+    api_base = api_config.api_base
+    model = api_config.model
+    api_type = api_config.api_type
 
-    chat_model = ChatModel(api_base=api_base, model=model, api_type=api_config.api_type)
     messages = format_messages(request.messages)
+
+    if request.debate:
+        # 討論モードの場合はDebateChatModelを使用
+        chat_model = DebateChatModel(api_base=api_base, model=model, api_type=api_type)
+    else:
+        # 通常モードの場合はSimpleChatModelを使用
+        chat_model = SimpleChatModel(api_base=api_base, model=model, api_type=api_type)
 
     response = await chat_model.get_response(messages)
     return ChatResponse(response=response)
@@ -124,22 +132,21 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
         while True:
             # クライアントからのメッセージを待機
             data = await websocket.receive_json()
-            # WebSocketから受信したデータをログ出力
 
             # ChatRequestの形式に変換
             request = ChatRequest(**data)
             messages = format_messages(request.messages)
 
-            # グローバル設定を使用してチャットモデルをインスタンス化
-            api_base = api_config.api_base  # デフォルト値を保証
-            model = api_config.model  # デフォルト値を保証
-
-            chat_model = ChatModel(
-                api_base=api_base, model=model, api_type=api_config.api_type
-            )
+            # グローバル設定を使用
+            api_base = api_config.api_base
+            model = api_config.model
+            api_type = api_config.api_type
 
             if request.debate:
-                # 討論モードの場合
+                # 討論モードの場合はDebateChatModelを使用
+                chat_model = DebateChatModel(api_base=api_base, model=model, api_type=api_type)
+
+                # コールバック関数を定義
                 async def send_update(system: str, response: str, phase: str) -> None:
                     """討論モードでの更新をクライアントに送信."""
                     response_data = {
@@ -157,7 +164,10 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                     pass
 
             elif request.stream:
-                # 通常のストリーミングモードの場合
+                # 通常のストリーミングモードの場合はSimpleChatModelを使用
+                chat_model = SimpleChatModel(api_base=api_base, model=model, api_type=api_type)
+
+                # コールバック関数を定義
                 async def send_update(system: str, response: str) -> None:
                     """ストリーミングモードでの更新をクライアントに送信."""
                     # phaseパラメータを追加してフロントエンドとのインターフェースを統一
@@ -177,6 +187,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
 
             else:
                 # 非ストリーミング、非討論モードの場合
+                chat_model = SimpleChatModel(api_base=api_base, model=model, api_type=api_type)
                 response = await chat_model.get_response(messages)
                 response_data = {
                     "system": "consensus",
