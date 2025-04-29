@@ -120,31 +120,3 @@ export const connectToWebSocket = ({
     },
   };
 };
-
-// 通常のHTTP APIを使ってチャットメッセージを送信（非ストリーミングモード）
-// @param messages 送信するメッセージ配列
-// @returns レスポンスを返すPromise
-export const sendChatMessage = async (messages: Message[]): Promise<any> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messages,
-        stream: false,
-        debate: false,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`APIエラー: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("チャットメッセージの送信中にエラーが発生しました:", error);
-    throw error;
-  }
-};
