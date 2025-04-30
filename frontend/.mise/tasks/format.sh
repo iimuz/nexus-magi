@@ -3,3 +3,5 @@
 
 set -eu
 set -o pipefail
+
+npm fix
