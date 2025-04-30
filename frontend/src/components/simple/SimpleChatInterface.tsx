@@ -5,7 +5,6 @@ import {
   Container,
   TextField,
   Button,
-  Typography,
   Paper,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";

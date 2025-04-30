@@ -66,7 +66,7 @@ const ChatInterface: React.FC = () => {
   const [debateMode, setDebateMode] = useState<boolean>(true);
 
   // 討論ラウンド数
-  const [debateRounds, setDebateRounds] = useState<number>(1);
+  const [debateRounds] = useState<number>(1);
 
   // メッセージリストの参照
   const messagesEndRef = useRef<HTMLDivElement | null>(null);

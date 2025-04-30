@@ -1,7 +1,6 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-/* eslint-disable */
 import type { ChatRequest } from '../models/ChatRequest';
 import type { WebSocketResponse } from '../models/WebSocketResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
