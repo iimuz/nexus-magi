@@ -1,34 +1,19 @@
 [project]
 authors = [{ name = "iimuz", email = "iz.primary.story+github@gmail.com" }]
-description = "LLM Agent application."
-name = "nexus_magi"
+description = "API definition for NEXUS MAGI"
+name = "nexus_magi_api"
 requires-python = ">=3.11"
 urls = { repository = "https://github.com/iimuz/nexus-magi" }
 version = "1.0.0"
 
 dependencies = [
-  "langgraph>=0.0.20",
-  "textual>=0.52.1",
-  "litellm>=1.33.1",
-  "requests>=2.31.0",
-  "fastapi>=0.100.0",
-  "uvicorn>=0.22.0",
-  "websockets>=11.0.3",
   "pydantic>=2.0.0",
   "pyyaml>=6.0",
+  "datamodel-code-generator>=0.25.0",
 ]
 
-[project.scripts]
-nexus-magi = "nexus_magi.__main__:main"
-
-[tool.setuptools.packages.find]
-where = ["."]
 [project.optional-dependencies]
-dev = [
-  "mypy",
-  "ruff",
-]
-test = ["pytest"]
+dev = ["mypy", "ruff"]
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -38,10 +23,7 @@ requires = ["setuptools>=68", "wheel"]
 indent-width = 4
 line-length = 88
 
-extend-exclude = [
-  ".vscode",
-  "data",
-]
+extend-exclude = [".vscode", "data"]
 
 [tool.ruff.lint]
 # Allow lint for all enabled rules
@@ -55,13 +37,3 @@ ignore = [
   "RUF003",
 ]
 select = ["ALL"]
-
-# Allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
-unfixable = []
-
-[tool.ruff.format]
-indent-style = "space" # Like Black, indent with spaces, rather than tabs.
-line-ending = "auto" # Like Black, automatically detect the appropriate line ending.
-quote-style = "double" # Like Black, use double quotes for strings.
-skip-magic-trailing-comma = false # Like Black, respect magic trailing commas.

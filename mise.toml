@@ -1,6 +1,7 @@
 [tools]
-nodejs = "22"
 dprint = "0.49"
+nodejs = "22"
+python = "3.11"
 
 [env]
 mise.file = ".env"

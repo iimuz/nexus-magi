@@ -7,7 +7,7 @@
     "build": "tsp compile . --emit @typespec/openapi3",
     "watch": "tsp compile . --watch",
     "generate-client": "npx openapi-typescript-codegen --input ./tsp-output/@typespec/openapi3/openapi.yaml --output ../frontend/src/generated-api --client axios",
-    "generate-python-models": "cd ../backend && python scripts/generate_models.py",
+    "generate-python-models": "python scripts/generate_models.py",
     "generate-all": "npm run build && npm run generate-client && npm run generate-python-models"
   },
   "keywords": [],

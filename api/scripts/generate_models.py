@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """OpenAPI仕様からPydanticモデルを生成するスクリプト."""
 
 import subprocess
@@ -7,9 +6,9 @@ from pathlib import Path
 
 # プロジェクトのルートディレクトリを取得
 SCRIPT_DIR = Path(__file__).parent.absolute()
-ROOT_DIR = SCRIPT_DIR.parent.parent
-API_DIR = ROOT_DIR / "api"
-BACKEND_DIR = ROOT_DIR / "backend"
+ROOT_DIR = SCRIPT_DIR.parent
+API_DIR = ROOT_DIR
+BACKEND_DIR = ROOT_DIR.parent / "backend"
 
 # OpenAPI仕様ファイルのパス
 OPENAPI_SPEC = API_DIR / "tsp-output" / "@typespec" / "openapi3" / "openapi.yaml"
