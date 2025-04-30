@@ -130,9 +130,7 @@ class SimpleChatModel:
         """
         # 非同期で実行するために、ThreadPoolExecutorを使用
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(None, lambda: self._call_api(messages))
-
-        return result
+        return await loop.run_in_executor(None, lambda: self._call_api(messages))
 
     async def get_response_streaming(
         self,
@@ -156,5 +154,6 @@ class SimpleChatModel:
         if callback:
             await callback("melchior", response)
 
-        # 結果をyield - melchiorシステムとして応答すると、既存のフロントエンドコードと互換性がある
+        # 結果をyield - melchiorシステムとして応答すると、
+        # 既存のフロントエンドコードと互換性がある
         yield {"system": "melchior", "response": response, "phase": "initial"}

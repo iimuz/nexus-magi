@@ -41,6 +41,7 @@ line-length = 88
 extend-exclude = [
   ".vscode",
   "data",
+  "nexus_magi/api_gen/", # 自動生成されるファイルを除外
 ]
 
 [tool.ruff.lint]
