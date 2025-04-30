@@ -148,9 +148,9 @@ async def chat_websocket_endpoint(websocket: WebSocket) -> None:
                 # 非ストリーミングモードの場合
                 response = await chat_model.get_response(messages)
                 response_data = {
-                    "system": "consensus",
+                    "system": "melchior",  # シンプルモードではmelchiorとして応答
                     "response": response,
-                    "phase": "final",
+                    "phase": "initial",  # 単一の応答なのでinitialフェーズとする
                 }
                 await websocket.send_json(response_data)
 
