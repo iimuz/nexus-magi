@@ -1,0 +1,25 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsp compile .",
+    "build": "tsp compile . --emit @typespec/openapi3",
+    "watch": "tsp compile . --watch",
+    "generate-client": "npx openapi-typescript-codegen --input ./tsp-output/@typespec/openapi3/openapi.yaml --output ../frontend/src/generated-api --client axios",
+    "generate-python-models": "cd ../backend && python scripts/generate_models.py",
+    "generate-all": "npm run build && npm run generate-client && npm run generate-python-models"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@typespec/compiler": "^0.54.0",
+    "@typespec/http": "^0.54.0",
+    "@typespec/json-schema": "^0.54.0",
+    "@typespec/openapi3": "^0.54.0",
+    "@typespec/rest": "^0.54.0",
+    "openapi-typescript-codegen": "^0.28.0"
+  }
+}
