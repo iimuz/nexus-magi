@@ -128,7 +128,7 @@ const ChatInterface: React.FC = () => {
     console.log("WebSocket接続を開始");
     wsConnectionRef.current = connectToWebSocket({
       messages: newMessages,
-      debate: debateMode,
+      debate: debateMode, // 討論モードの設定によってエンドポイントが選択される
       debateRounds: debateRounds,
       onMelchiorResponse: (response: string, phase?: string) => {
         console.log("MELCHIORからの応答を受信:", response, phase);

@@ -46,9 +46,10 @@ export const connectToWebSocket = ({
   onConsensusResponse,
   onError,
 }: WebSocketOptions): WebSocketConnection => {
-  // WebSocketの生成
+  // WebSocketの生成 - 討論モードによってエンドポイントを分ける
+  const wsEndpoint = debate ? "/api/debate/ws" : "/api/chat/ws";
   const socket = new WebSocket(
-    `${API_BASE_URL.replace("http", "ws")}/api/chat/ws`,
+    `${API_BASE_URL.replace("http", "ws")}${wsEndpoint}`,
   );
 
   // 接続オープン時のハンドラ
@@ -59,7 +60,6 @@ export const connectToWebSocket = ({
     const requestData = {
       messages,
       stream: true,
-      debate,
       debate_rounds: debateRounds,
     };
     console.log("送信データ:", requestData);

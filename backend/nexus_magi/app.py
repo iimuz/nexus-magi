@@ -104,8 +104,8 @@ async def root() -> dict[str, str]:
 
 
 @app.websocket("/api/chat/ws")
-async def websocket_endpoint(websocket: WebSocket) -> None:
-    """WebSocketエンドポイント."""
+async def chat_websocket_endpoint(websocket: WebSocket) -> None:
+    """通常チャット用WebSocketエンドポイント."""
     await manager.connect(websocket)
     try:
         while True:
@@ -121,30 +121,11 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             model = api_config.model
             api_type = api_config.api_type
 
-            if request.debate:
-                # 討論モードの場合はDebateChatModelを使用
-                chat_model = DebateChatModel(api_base=api_base, model=model, api_type=api_type)
+            # SimpleChatModelを使用
+            chat_model = SimpleChatModel(api_base=api_base, model=model, api_type=api_type)
 
-                # コールバック関数を定義
-                async def send_update(system: str, response: str, phase: str) -> None:
-                    """討論モードでの更新をクライアントに送信."""
-                    response_data = {
-                        "system": system,
-                        "response": response,
-                        "phase": phase,
-                    }
-                    await websocket.send_json(response_data)
-
-                # 討論を含むストリーミングレスポンスを生成
-                async for _response in chat_model.get_response_with_debate(
-                    messages, send_update, debate_rounds=request.debate_rounds
-                ):
-                    # すでにコールバックで処理されているので、ここでは何もしない
-                    pass
-
-            elif request.stream:
-                # 通常のストリーミングモードの場合はSimpleChatModelを使用
-                chat_model = SimpleChatModel(api_base=api_base, model=model, api_type=api_type)
+            if request.stream:
+                # ストリーミングモードの場合
 
                 # コールバック関数を定義
                 async def send_update(system: str, response: str) -> None:
@@ -163,10 +144,8 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 ):
                     # すでにコールバックで処理されているので、ここでは何もしない
                     pass
-
             else:
-                # 非ストリーミング、非討論モードの場合
-                chat_model = SimpleChatModel(api_base=api_base, model=model, api_type=api_type)
+                # 非ストリーミングモードの場合
                 response = await chat_model.get_response(messages)
                 response_data = {
                     "system": "consensus",
@@ -174,6 +153,48 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                     "phase": "final",
                 }
                 await websocket.send_json(response_data)
+
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+
+@app.websocket("/api/debate/ws")
+async def debate_websocket_endpoint(websocket: WebSocket) -> None:
+    """討論モード用WebSocketエンドポイント."""
+    await manager.connect(websocket)
+    try:
+        while True:
+            # クライアントからのメッセージを待機
+            data = await websocket.receive_json()
+
+            # ChatRequestの形式に変換
+            request = ChatRequest(**data)
+            messages = format_messages(request.messages)
+
+            # グローバル設定を使用
+            api_base = api_config.api_base
+            model = api_config.model
+            api_type = api_config.api_type
+
+            # 討論モードはDebateChatModelを使用
+            chat_model = DebateChatModel(api_base=api_base, model=model, api_type=api_type)
+
+            # コールバック関数を定義
+            async def send_update(system: str, response: str, phase: str) -> None:
+                """討論モードでの更新をクライアントに送信."""
+                response_data = {
+                    "system": system,
+                    "response": response,
+                    "phase": phase,
+                }
+                await websocket.send_json(response_data)
+
+            # 討論を含むストリーミングレスポンスを生成
+            async for _response in chat_model.get_response_with_debate(
+                messages, send_update, debate_rounds=request.debate_rounds
+            ):
+                # すでにコールバックで処理されているので、ここでは何もしない
+                pass
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
