@@ -2,8 +2,9 @@
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
+# 生成されたAPIモデルをインポート
+from nexus_magi.api_gen.models import ChatMessage, ChatRequest, WebSocketResponse
 from nexus_magi.debate_chat_model import DebateChatModel
 from nexus_magi.simple_chat_model import SimpleChatModel
 
@@ -32,28 +33,6 @@ class APIConfig:
 
 # APIの設定
 api_config = APIConfig()
-
-
-class ChatMessage(BaseModel):
-    """チャットメッセージのモデル."""
-
-    role: str
-    content: str
-
-
-class ChatRequest(BaseModel):
-    """チャットリクエストのモデル."""
-
-    messages: list[ChatMessage]
-    stream: bool = False
-    debate: bool = False
-    debate_rounds: int = 1
-
-
-class ChatResponse(BaseModel):
-    """チャットレスポンスのモデル."""
-
-    response: str
 
 
 class ConnectionManager:
@@ -93,8 +72,11 @@ manager = ConnectionManager()
 
 
 def format_messages(messages: list[ChatMessage]) -> list[dict[str, str]]:
-    """Pydanticモデルのメッセージリストを辞書リストに変換."""
-    return [{"role": msg.role, "content": msg.content} for msg in messages]
+    """Pydanticモデルのメッセージリストを辞書リストに変換.
+
+    Enumオブジェクトを文字列に変換して返します。
+    """
+    return [{"role": msg.role.value, "content": msg.content} for msg in messages]
 
 
 @app.get("/")
@@ -130,13 +112,19 @@ async def chat_websocket_endpoint(websocket: WebSocket) -> None:
                 # コールバック関数を定義
                 async def send_update(system: str, response: str) -> None:
                     """ストリーミングモードでの更新をクライアントに送信."""
-                    # phaseパラメータを追加してフロントエンドとのインターフェースを統一
-                    response_data = {
-                        "system": system,
-                        "response": response,
-                        "phase": "initial",  # 互換性のためにphaseを追加
+                    # OpenAPI生成モデルを使用してレスポンスを作成
+                    response_data = WebSocketResponse(
+                        system=system,
+                        response=response,
+                        phase="initial",  # 互換性のためにphaseを追加
+                    )
+                    # モデルをJSONに変換する際にEnumの値を取得するための辞書を作成
+                    response_dict = {
+                        "system": response_data.system.value,
+                        "response": response_data.response,
+                        "phase": response_data.phase
                     }
-                    await websocket.send_json(response_data)
+                    await websocket.send_json(response_dict)
 
                 # ストリーミングレスポンスを生成
                 async for _response in chat_model.get_response_streaming(
@@ -147,12 +135,19 @@ async def chat_websocket_endpoint(websocket: WebSocket) -> None:
             else:
                 # 非ストリーミングモードの場合
                 response = await chat_model.get_response(messages)
-                response_data = {
-                    "system": "melchior",  # シンプルモードではmelchiorとして応答
-                    "response": response,
-                    "phase": "initial",  # 単一の応答なのでinitialフェーズとする
+                # OpenAPI生成モデルを使用してレスポンスを作成
+                response_data = WebSocketResponse(
+                    system="melchior",  # シンプルモードではmelchiorとして応答
+                    response=response,
+                    phase="initial",  # 単一の応答なのでinitialフェーズとする
+                )
+                # モデルをJSONに変換する際にEnumの値を取得するための辞書を作成
+                response_dict = {
+                    "system": response_data.system.value,
+                    "response": response_data.response,
+                    "phase": response_data.phase
                 }
-                await websocket.send_json(response_data)
+                await websocket.send_json(response_dict)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
@@ -182,12 +177,19 @@ async def debate_websocket_endpoint(websocket: WebSocket) -> None:
             # コールバック関数を定義
             async def send_update(system: str, response: str, phase: str) -> None:
                 """討論モードでの更新をクライアントに送信."""
-                response_data = {
-                    "system": system,
-                    "response": response,
-                    "phase": phase,
+                # OpenAPI生成モデルを使用してレスポンスを作成
+                response_data = WebSocketResponse(
+                    system=system,
+                    response=response,
+                    phase=phase,
+                )
+                # モデルをJSONに変換する際にEnumの値を取得するための辞書を作成
+                response_dict = {
+                    "system": response_data.system.value,
+                    "response": response_data.response,
+                    "phase": response_data.phase
                 }
-                await websocket.send_json(response_data)
+                await websocket.send_json(response_dict)
 
             # 討論を含むストリーミングレスポンスを生成
             async for _response in chat_model.get_response_with_debate(
