@@ -189,29 +189,32 @@ mypy backend
 
 ```
 /
-├── api/              # API定義（TypeSpec）
-│   ├── main.tsp      # TypeSpec API定義
-│   ├── package.json  # API生成用依存関係
-│   └── tsp-output/   # 生成されたOpenAPI仕様
-├── backend/          # バックエンドコード
-│   ├── nexus_magi/   # メインパッケージ
-│   │   ├── api_gen/  # 生成されたPydanticモデル
-│   │   └── ...       # その他のバックエンドコード
-│   ├── scripts/      # 生成スクリプトなど
-│   ├── pyproject.toml # バックエンド用Python設定
-│   ├── setup.cfg     # バックエンド用Python設定
-│   └── setup.py      # バックエンド用Pythonパッケージ設定
-├── frontend/         # フロントエンドコード
-│   ├── package.json  # フロントエンド依存関係
-│   ├── public/       # 静的ファイル
-│   └── src/          # フロントエンドソースコード
+├── api/                   # API定義（TypeSpec）
+│   ├── main.tsp           # TypeSpec API定義
+│   ├── package.json       # API生成用依存関係
+│   ├── pyproject.toml     # Pythonモデル生成用の設定
+│   ├── scripts/           # APIコード生成スクリプト
+│   │   └── generate_models.py  # Pythonモデル生成スクリプト
+│   └── tsp-output/        # 生成されたOpenAPI仕様
+├── backend/               # バックエンドコード
+│   ├── nexus_magi/        # メインパッケージ
+│   │   ├── api_gen/       # 生成されたPydanticモデル
+│   │   │   ├── __init__.py
+│   │   │   └── models.py  # 自動生成されたPythonモデル
+│   │   └── ...            # その他のバックエンドコード
+│   ├── pyproject.toml     # バックエンド用Python設定
+│   ├── setup.cfg          # バックエンド用Python設定
+│   └── setup.py           # バックエンド用Pythonパッケージ設定
+├── frontend/              # フロントエンドコード
+│   ├── package.json       # フロントエンド依存関係
+│   ├── public/            # 静的ファイル
+│   └── src/               # フロントエンドソースコード
 │       ├── generated-api/ # 生成されたTypeScriptクライアント
-│       └── ...        # その他のフロントエンドコード
-├── dprint.json       # dprint設定
-├── mise.toml         # mise設定
-├── package.json      # プロジェクト依存関係
-├── memory-bank/      # プロジェクト関連ドキュメント
-└── LICENSE           # ライセンスファイル
+│       └── ...            # その他のフロントエンドコード
+├── dprint.json            # dprint設定
+├── mise.toml              # mise設定
+├── package.json           # プロジェクト依存関係
+└── LICENSE                # ライセンスファイル
 ```
 
 ## ライセンス
