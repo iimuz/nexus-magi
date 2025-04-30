@@ -77,16 +77,24 @@ export class MagiWebSocketClient {
         // システムごとの応答を処理
         if (data.system === "melchior") {
           console.log("MELCHIORの応答を処理:", data.response, data.phase);
-          onMelchiorResponse && onMelchiorResponse(data.response, data.phase);
+          if (onMelchiorResponse) {
+            onMelchiorResponse(data.response, data.phase);
+          }
         } else if (data.system === "balthasar") {
           console.log("BALTHASARの応答を処理:", data.response, data.phase);
-          onBalthasarResponse && onBalthasarResponse(data.response, data.phase);
+          if (onBalthasarResponse) {
+            onBalthasarResponse(data.response, data.phase);
+          }
         } else if (data.system === "casper") {
           console.log("CASPERの応答を処理:", data.response, data.phase);
-          onCasperResponse && onCasperResponse(data.response, data.phase);
+          if (onCasperResponse) {
+            onCasperResponse(data.response, data.phase);
+          }
         } else if (data.system === "consensus") {
           console.log("最終合議結果を処理:", data.response, data.phase);
-          onConsensusResponse && onConsensusResponse(data.response, data.phase);
+          if (onConsensusResponse) {
+            onConsensusResponse(data.response, data.phase);
+          }
         } else {
           console.warn("不明なシステムからの応答:", data);
         }
@@ -96,15 +104,18 @@ export class MagiWebSocketClient {
           error,
         );
         console.error("受信したデータ:", event.data);
-        onError &&
+        if (onError) {
           onError(error instanceof Error ? error : new Error(String(error)));
+        }
       }
     };
 
     // エラー時のハンドラ
     socket.onerror = (error: Event) => {
       console.error("WebSocket接続エラー:", error);
-      onError && onError(new Error("WebSocket connection error"));
+      if (onError) {
+        onError(new Error("WebSocket connection error"));
+      }
     };
 
     // 接続クローズ時のハンドラ
