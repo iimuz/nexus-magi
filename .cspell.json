@@ -5,6 +5,8 @@
     "autodocstring",
     "BALTHASAR",
     "cmds",
+    "codegen",
+    "datamodel",
     "devcontainer",
     "docstring",
     "dotenv",
@@ -23,9 +25,11 @@
     "pydantic",
     "pyproject",
     "pytest",
+    "pyyaml",
     "Segoe",
     "setuptools",
     "Taskfile",
+    "typespec",
     "unfixable",
     "uvicorn",
     "venv",
@@ -43,6 +47,9 @@
     "**/node_modules/**",
     "**/package-lock.json",
     "**/requirements.txt",
-    "**/requirements-dev.txt"
+    "**/requirements-dev.txt",
+    "api/tsp-output/**",
+    "backend/nexus_magi/api_gen/**",
+    "frontend/src/generated-api/**"
   ]
 }

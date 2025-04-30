@@ -3,3 +3,9 @@
 .venv/
 data/
 node_modules/
+
+api/tsp-output/
+
+backend/nexus_magi/api_gen/
+
+frontend/src/generated-api/
