@@ -15,8 +15,8 @@ class Role(Enum):
     メッセージの役割（ユーザーまたはアシスタント）
     """
 
-    user = 'user'
-    assistant = 'assistant'
+    user = "user"
+    assistant = "assistant"
 
 
 class ChatMessage(BaseModel):
@@ -54,10 +54,10 @@ class System(Enum):
     レスポンスを生成するシステム（MAGI）
     """
 
-    melchior = 'melchior'
-    balthasar = 'balthasar'
-    casper = 'casper'
-    consensus = 'consensus'
+    melchior = "melchior"
+    balthasar = "balthasar"
+    casper = "casper"
+    consensus = "consensus"
 
 
 class WebSocketResponse(BaseModel):

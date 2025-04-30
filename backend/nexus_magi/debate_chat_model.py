@@ -504,9 +504,7 @@ class DebateChatModel:
         messages = self._add_system_instructions(state["messages"], magi_type)
 
         loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None, lambda: self._call_api(messages)
-        )
+        response = await loop.run_in_executor(None, lambda: self._call_api(messages))
 
         # MAGIシステムに応じた応答を状態に追加
         if magi_type == MagiSystem.MELCHIOR:

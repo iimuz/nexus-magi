@@ -23,13 +23,18 @@ OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
 # datamodel-code-generatorを使用してモデルを生成
 cmd = [
     "datamodel-codegen",
-    "--input", str(OPENAPI_SPEC),
-    "--output", str(OUTPUT_DIR / "models.py"),
-    "--input-file-type", "openapi",
-    "--output-model-type", "pydantic.BaseModel",
-    "--target-python-version", "3.11",
+    "--input",
+    str(OPENAPI_SPEC),
+    "--output",
+    str(OUTPUT_DIR / "models.py"),
+    "--input-file-type",
+    "openapi",
+    "--output-model-type",
+    "pydantic.BaseModel",
+    "--target-python-version",
+    "3.11",
     "--use-schema-description",
-    "--use-field-description"
+    "--use-field-description",
 ]
 
 print(f"Generating Python models from OpenAPI spec: {OPENAPI_SPEC}")

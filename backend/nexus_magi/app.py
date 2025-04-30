@@ -104,7 +104,9 @@ async def chat_websocket_endpoint(websocket: WebSocket) -> None:
             api_type = api_config.api_type
 
             # SimpleChatModelを使用
-            chat_model = SimpleChatModel(api_base=api_base, model=model, api_type=api_type)
+            chat_model = SimpleChatModel(
+                api_base=api_base, model=model, api_type=api_type
+            )
 
             if request.stream:
                 # ストリーミングモードの場合
@@ -122,7 +124,7 @@ async def chat_websocket_endpoint(websocket: WebSocket) -> None:
                     response_dict = {
                         "system": response_data.system.value,
                         "response": response_data.response,
-                        "phase": response_data.phase
+                        "phase": response_data.phase,
                     }
                     await websocket.send_json(response_dict)
 
@@ -145,7 +147,7 @@ async def chat_websocket_endpoint(websocket: WebSocket) -> None:
                 response_dict = {
                     "system": response_data.system.value,
                     "response": response_data.response,
-                    "phase": response_data.phase
+                    "phase": response_data.phase,
                 }
                 await websocket.send_json(response_dict)
 
@@ -172,7 +174,9 @@ async def debate_websocket_endpoint(websocket: WebSocket) -> None:
             api_type = api_config.api_type
 
             # 討論モードはDebateChatModelを使用
-            chat_model = DebateChatModel(api_base=api_base, model=model, api_type=api_type)
+            chat_model = DebateChatModel(
+                api_base=api_base, model=model, api_type=api_type
+            )
 
             # コールバック関数を定義
             async def send_update(system: str, response: str, phase: str) -> None:
@@ -187,7 +191,7 @@ async def debate_websocket_endpoint(websocket: WebSocket) -> None:
                 response_dict = {
                     "system": response_data.system.value,
                     "response": response_data.response,
-                    "phase": response_data.phase
+                    "phase": response_data.phase,
                 }
                 await websocket.send_json(response_dict)
 
