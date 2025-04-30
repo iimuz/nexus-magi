@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "lint:spell": "npx cspell lint . --no-progress",
+    "check": "npx prettier --check '**/*.{yml,yaml}'"
+  },
   "devDependencies": {
     "cspell": "^8.19.2",
     "prettier": "^3.5.3"

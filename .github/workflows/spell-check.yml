@@ -11,6 +11,6 @@ jobs:
         with:
           node-version: "20.x"
       - name: Install dependencies
-        run: npm install -D
+        run: npm ci
       - name: execute spell-check
-        run: npx cspell lint .
+        run: npm run lint:spell

@@ -1,7 +1,8 @@
-name: prettier
+name: Frontend Code Check
 on: [push, pull_request]
+
 jobs:
-  prettier:
+  code-check:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -11,6 +12,8 @@ jobs:
         with:
           node-version: "20.x"
       - name: Install dependencies
+        working-directory: ./frontend
         run: npm ci
-      - name: Check formatting
+      - name: Run code checks
+        working-directory: ./frontend
         run: npm run check

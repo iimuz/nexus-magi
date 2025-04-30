@@ -4,4 +4,4 @@
 set -eu
 set -o pipefail
 
-npm fix
+npm run fix

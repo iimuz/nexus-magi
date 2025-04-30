@@ -6,4 +6,4 @@
 set -eu
 set -o pipefail
 
-npm install --ci
+npm ci

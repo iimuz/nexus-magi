@@ -8,10 +8,10 @@ echo "Lint markdown files..."
 dprint check
 
 echo "Lint yaml files..."
-npx prettier --check "**/*.{yml,yaml}"
+npm run check
 
 echo "Check spell..."
-npx cspell lint . --no-progress
+npm run lint:spell
 
 echo "Lint api files..."
 cd api
