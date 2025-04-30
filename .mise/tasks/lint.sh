@@ -4,11 +4,6 @@
 set -eu
 set -o pipefail
 
-echo "Lint backend files..."
-cd backend
-  mise run lint
-cd -
-
 echo "Lint markdown files..."
 dprint check
 
@@ -17,3 +12,18 @@ npx prettier --check "**/*.{yml,yaml}"
 
 echo "Check spell..."
 npx cspell lint . --no-progress
+
+echo "Lint api files..."
+cd api
+  mise run lint
+cd -
+
+echo "Lint backend files..."
+cd backend
+  mise run lint
+cd -
+
+echo "Lint frontend files..."
+cd frontend
+  mise run lint
+cd -
