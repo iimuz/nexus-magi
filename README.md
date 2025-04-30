@@ -11,6 +11,8 @@
 - WebSocketを活用したリアルタイムストリーミング応答
 - ローカルLLM対応（[Ollama](https://ollama.com/)または[LiteLLM](https://github.com/BerriAI/litellm)経由）
 - [langgraph](https://github.com/langchain-ai/langgraph)を使用したワークフロー管理
+- [TypeSpec](https://typespec.io/)を利用したAPI定義の一元管理
+- OpenAPI仕様から自動生成されたクライアントコードとバックエンドモデル
 
 ## 環境構築
 
@@ -57,7 +59,16 @@ cd frontend
 npm install
 ```
 
-4. LLMサーバーの準備
+4. APIおよびクライアントコードの生成
+
+```bash
+# APIディレクトリに移動
+cd ../api
+npm install
+npm run generate-all
+```
+
+5. LLMサーバーの準備
 
    - [Ollama](https://ollama.com/)をインストールして起動
    - 使用するモデル（例: phi4-mini）をダウンロード
@@ -114,19 +125,36 @@ REACT_APP_API_BASE_URL=http://localhost:8080 npm start
 
 ## アーキテクチャ
 
-プロジェクトは以下の2つの主要コンポーネントで構成されています：
+プロジェクトは以下の3つの主要コンポーネントで構成されています：
 
-1. **バックエンド（FastAPI）**
+1. **API定義（TypeSpec）**
+   - `/api` ディレクトリにTypeSpecでAPI定義を管理
+   - OpenAPI仕様を自動生成
+   - フロントエンド用TypeScriptクライアントコードとバックエンド用Pydanticモデルを生成
+
+2. **バックエンド（FastAPI）**
    - RESTful APIとWebSocketエンドポイントを提供
    - LLMとの連携処理
    - MAGI合議システムのビジネスロジック
+   - TypeSpecから生成されたPydanticモデルを使用
 
-2. **フロントエンド（React）**
+3. **フロントエンド（React）**
    - モダンなWeb UIインターフェース
    - WebSocketを通じたリアルタイム通信
    - Material UIを使用したレスポンシブデザイン
+   - TypeSpecから生成されたクライアントコードを使用
 
 ## 開発者向け情報
+
+### API開発ワークフロー
+
+APIの変更が必要な場合は、以下の手順で行います：
+
+1. `/api/main.tsp`でTypeSpec定義を更新
+2. `/api`ディレクトリで`npm run generate-all`を実行
+3. 自動的にOpenAPI仕様、フロントエンド用クライアントコード、バックエンド用Pydanticモデルが生成されます
+
+これにより、フロントエンドとバックエンドの型定義が自動的に同期され、一貫性のあるAPIインターフェースが維持されます。
 
 ### コードスタイル
 
@@ -161,20 +189,29 @@ mypy backend
 
 ```
 /
-├── backend/           # バックエンドコード
-│   ├── nexus_magi/    # メインパッケージ
+├── api/              # API定義（TypeSpec）
+│   ├── main.tsp      # TypeSpec API定義
+│   ├── package.json  # API生成用依存関係
+│   └── tsp-output/   # 生成されたOpenAPI仕様
+├── backend/          # バックエンドコード
+│   ├── nexus_magi/   # メインパッケージ
+│   │   ├── api_gen/  # 生成されたPydanticモデル
+│   │   └── ...       # その他のバックエンドコード
+│   ├── scripts/      # 生成スクリプトなど
 │   ├── pyproject.toml # バックエンド用Python設定
-│   ├── setup.cfg      # バックエンド用Python設定
-│   └── setup.py       # バックエンド用Pythonパッケージ設定
-├── frontend/          # フロントエンドコード
-│   ├── package.json   # フロントエンド依存関係
-│   ├── public/        # 静的ファイル
-│   └── src/           # フロントエンドソースコード
-├── dprint.json        # dprint設定
-├── mise.toml          # mise設定
-├── package.json       # プロジェクト依存関係
-├── memory-bank/       # プロジェクト関連ドキュメント
-└── LICENSE            # ライセンスファイル
+│   ├── setup.cfg     # バックエンド用Python設定
+│   └── setup.py      # バックエンド用Pythonパッケージ設定
+├── frontend/         # フロントエンドコード
+│   ├── package.json  # フロントエンド依存関係
+│   ├── public/       # 静的ファイル
+│   └── src/          # フロントエンドソースコード
+│       ├── generated-api/ # 生成されたTypeScriptクライアント
+│       └── ...        # その他のフロントエンドコード
+├── dprint.json       # dprint設定
+├── mise.toml         # mise設定
+├── package.json      # プロジェクト依存関係
+├── memory-bank/      # プロジェクト関連ドキュメント
+└── LICENSE           # ライセンスファイル
 ```
 
 ## ライセンス
