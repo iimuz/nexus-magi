@@ -17,3 +17,8 @@ echo "Format backend files..."
 cd backend
   mise run format
 cd -
+
+echo "Format frontend files..."
+cd frontend
+  mise run format
+cd -
