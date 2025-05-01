@@ -1,5 +1,5 @@
-import React from "react";
-import { Box } from "@mui/material";
+import React from 'react';
+import { Box } from '@mui/material';
 
 // タブパネルコンポーネント
 interface TabPanelProps {
@@ -17,14 +17,10 @@ function TabPanel(props: TabPanelProps) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      style={{ height: "calc(100vh - 112px)" }}
+      style={{ height: 'calc(100vh - 112px)' }}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ height: "100%" }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ height: '100%' }}>{children}</Box>}
     </div>
   );
 }

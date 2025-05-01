@@ -1,15 +1,8 @@
-import React, { useState } from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  Tabs,
-  Tab,
-} from "@mui/material";
-import SimpleChatInterface from "./components/simple/SimpleChatInterface.tsx";
-import DebateChatInterface from "./components/debate/DebateChatInterface.tsx";
-import TabPanel from "./components/TabPanel.tsx";
+import React, { useState } from 'react';
+import { AppBar, Toolbar, Typography, Box, Tabs, Tab } from '@mui/material';
+import SimpleChatInterface from './components/simple/SimpleChatInterface.tsx';
+import DebateChatInterface from './components/debate/DebateChatInterface.tsx';
+import TabPanel from './components/TabPanel.tsx';
 
 // メイン App コンポーネント
 const App: React.FC = () => {
@@ -22,7 +15,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* ヘッダー */}
       <AppBar position="static">
         <Toolbar>
@@ -30,12 +23,7 @@ const App: React.FC = () => {
             Nexus MAGI
           </Typography>
         </Toolbar>
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          aria-label="chat mode tabs"
-          centered
-        >
+        <Tabs value={currentTab} onChange={handleTabChange} aria-label="chat mode tabs" centered>
           <Tab label="シンプルモード" />
           <Tab label="討論モード" />
         </Tabs>
