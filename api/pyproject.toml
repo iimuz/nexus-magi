@@ -1,0 +1,39 @@
+[project]
+authors = [{ name = "iimuz", email = "iz.primary.story+github@gmail.com" }]
+description = "API definition for NEXUS MAGI"
+name = "nexus_magi_api"
+requires-python = ">=3.11"
+urls = { repository = "https://github.com/iimuz/nexus-magi" }
+version = "1.0.0"
+
+dependencies = [
+  "pydantic>=2.0.0",
+  "pyyaml>=6.0",
+  "datamodel-code-generator>=0.25.0",
+]
+
+[project.optional-dependencies]
+dev = ["mypy", "ruff"]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+
+[tool.ruff]
+# same as black
+indent-width = 4
+line-length = 88
+
+extend-exclude = [".vscode", "data"]
+
+[tool.ruff.lint]
+# Allow lint for all enabled rules
+ignore = [
+  "D203", # `one-blank-line-before-class` (D203) and `no-blank-line-before-class` (D211) are incompatible
+  "D213", # `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible.
+  # The following rules may cause conflicts when used with the formatter: `COM812`, `ISC001`.
+  "COM812",
+  "ISC001",
+  # `ノ` は日本語でコメントしているので無視する
+  "RUF003",
+]
+select = ["ALL"]

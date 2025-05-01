@@ -1,51 +1,51 @@
-import React, { useEffect } from "react";
-import { Paper, Typography, Box, Divider, Chip } from "@mui/material";
-import ReactMarkdown from "react-markdown";
+import React, { useEffect } from 'react';
+import { Paper, Typography, Box, Divider, Chip } from '@mui/material';
+import ReactMarkdown from 'react-markdown';
 
 interface MagiSystemResponseProps {
   melchior?: string;
   balthasar?: string;
   casper?: string;
   consensus?: string;
-  phase?: "initial" | "thinking" | "debating" | "final" | string;
+  phase?: 'initial' | 'thinking' | 'debating' | 'final' | string;
 }
 
 // MAGI合議システムの応答を表示するコンポーネント
 const MagiSystemResponse: React.FC<MagiSystemResponseProps> = ({
-  melchior = "応答待ち...",
-  balthasar = "応答待ち...",
-  casper = "応答待ち...",
-  consensus = "",
-  phase = "initial",
+  melchior = '応答待ち...',
+  balthasar = '応答待ち...',
+  casper = '応答待ち...',
+  consensus = '',
+  phase = 'initial',
 }) => {
   // デバッグ情報を出力
   useEffect(() => {
-    console.log("MagiSystemResponseコンポーネントにプロップが届きました:");
-    console.log("melchior:", melchior);
-    console.log("balthasar:", balthasar);
-    console.log("casper:", casper);
-    console.log("consensus:", consensus);
-    console.log("phase:", phase);
+    console.log('MagiSystemResponseコンポーネントにプロップが届きました:');
+    console.log('melchior:', melchior);
+    console.log('balthasar:', balthasar);
+    console.log('casper:', casper);
+    console.log('consensus:', consensus);
+    console.log('phase:', phase);
   }, [melchior, balthasar, casper, consensus, phase]);
 
   // フェーズに応じたタイトルを設定
-  let phaseTitle = "";
-  if (phase === "initial") {
-    phaseTitle = "初期分析";
-  } else if (phase && phase.startsWith("debate_")) {
-    const roundNum = phase.split("_")[1];
+  let phaseTitle = '';
+  if (phase === 'initial') {
+    phaseTitle = '初期分析';
+  } else if (phase && phase.startsWith('debate_')) {
+    const roundNum = phase.split('_')[1];
     phaseTitle = `討論 (ラウンド ${roundNum})`;
-  } else if (phase === "final") {
-    phaseTitle = "最終判断";
+  } else if (phase === 'final') {
+    phaseTitle = '最終判断';
   }
 
   return (
-    <Box sx={{ mb: 2, width: "100%" }}>
+    <Box sx={{ mb: 2, width: '100%' }}>
       <Paper
         elevation={1}
         sx={{
           p: 2,
-          backgroundColor: "#f5f5f5",
+          backgroundColor: '#f5f5f5',
           borderRadius: 2,
         }}
       >
@@ -55,27 +55,23 @@ const MagiSystemResponse: React.FC<MagiSystemResponseProps> = ({
             <Chip
               label={phaseTitle}
               size="small"
-              sx={{ ml: 1, backgroundColor: "#2a2a42", color: "white" }}
+              sx={{ ml: 1, backgroundColor: '#2a2a42', color: 'white' }}
             />
           )}
         </Typography>
 
         {/* MELCHIOR */}
         <Box sx={{ mb: 2, mt: 2 }}>
-          <Typography
-            variant="subtitle2"
-            fontWeight="bold"
-            sx={{ color: "#AA0000" }}
-          >
+          <Typography variant="subtitle2" fontWeight="bold" sx={{ color: '#AA0000' }}>
             ■ MELCHIOR (科学者):
           </Typography>
           <Paper
             elevation={0}
             sx={{
               p: 1.5,
-              backgroundColor: "#2a2038",
-              color: "#FFD700",
-              borderLeft: "4px solid #AA0000",
+              backgroundColor: '#2a2038',
+              color: '#FFD700',
+              borderLeft: '4px solid #AA0000',
               my: 1,
             }}
           >
@@ -85,20 +81,16 @@ const MagiSystemResponse: React.FC<MagiSystemResponseProps> = ({
 
         {/* BALTHASAR */}
         <Box sx={{ mb: 2 }}>
-          <Typography
-            variant="subtitle2"
-            fontWeight="bold"
-            sx={{ color: "#00AA00" }}
-          >
+          <Typography variant="subtitle2" fontWeight="bold" sx={{ color: '#00AA00' }}>
             ■ BALTHASAR (母親):
           </Typography>
           <Paper
             elevation={0}
             sx={{
               p: 1.5,
-              backgroundColor: "#1a3a2a",
-              color: "#98FB98",
-              borderLeft: "4px solid #00AA00",
+              backgroundColor: '#1a3a2a',
+              color: '#98FB98',
+              borderLeft: '4px solid #00AA00',
               my: 1,
             }}
           >
@@ -108,20 +100,16 @@ const MagiSystemResponse: React.FC<MagiSystemResponseProps> = ({
 
         {/* CASPER */}
         <Box sx={{ mb: 2 }}>
-          <Typography
-            variant="subtitle2"
-            fontWeight="bold"
-            sx={{ color: "#0000AA" }}
-          >
+          <Typography variant="subtitle2" fontWeight="bold" sx={{ color: '#0000AA' }}>
             ■ CASPER (女性):
           </Typography>
           <Paper
             elevation={0}
             sx={{
               p: 1.5,
-              backgroundColor: "#1a2a3a",
-              color: "#ADD8E6",
-              borderLeft: "4px solid #0000AA",
+              backgroundColor: '#1a2a3a',
+              color: '#ADD8E6',
+              borderLeft: '4px solid #0000AA',
               my: 1,
             }}
           >
@@ -134,20 +122,16 @@ const MagiSystemResponse: React.FC<MagiSystemResponseProps> = ({
           <>
             <Divider sx={{ my: 2 }} />
             <Box>
-              <Typography
-                variant="subtitle2"
-                fontWeight="bold"
-                sx={{ color: "#8888FF" }}
-              >
+              <Typography variant="subtitle2" fontWeight="bold" sx={{ color: '#8888FF' }}>
                 【最終判断】
               </Typography>
               <Paper
                 elevation={0}
                 sx={{
                   p: 1.5,
-                  backgroundColor: "#2a2a42",
-                  color: "white",
-                  borderLeft: "4px solid #8888FF",
+                  backgroundColor: '#2a2a42',
+                  color: 'white',
+                  borderLeft: '4px solid #8888FF',
                   my: 1,
                 }}
               >

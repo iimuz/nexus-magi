@@ -7,14 +7,19 @@ set -eu
 set -o pipefail
 
 echo "setup project root directory"
-npm install --ci
+npm ci
+
+echo "setup api"
+cd api
+  mise run setup
+cd -
 
 echo "setup backend"
 cd backend
   mise run setup
 cd -
 
-echo "setup fronend"
+echo "setup frontend"
 cd frontend
-  npm install --ci
+  mise run setup
 cd -

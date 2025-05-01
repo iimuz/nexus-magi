@@ -1,0 +1,14 @@
+{
+  "extends": [
+    "@typespec/http/config",
+    "@typespec/rest/config",
+    "@typespec/openapi3/config"
+  ],
+  "options": {
+    "@typespec/openapi3": {
+      "outputFile": "openapi.json",
+      "emitterOutputDir": "generated"
+    }
+  },
+  "emit": ["@typespec/openapi3"]
+}

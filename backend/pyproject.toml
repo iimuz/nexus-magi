@@ -15,6 +15,7 @@ dependencies = [
   "uvicorn>=0.22.0",
   "websockets>=11.0.3",
   "pydantic>=2.0.0",
+  "pyyaml>=6.0",
 ]
 
 [project.scripts]
@@ -40,6 +41,7 @@ line-length = 88
 extend-exclude = [
   ".vscode",
   "data",
+  "nexus_magi/api_gen/", # 自動生成されるファイルを除外
 ]
 
 [tool.ruff.lint]

@@ -10,7 +10,17 @@ echo "Update project root directory"
 npm install --include=dev cspell@latest prettier@latest
 dprint config update
 
+echo "Update api"
+cd api
+  mise run update
+cd -
+
 echo "Update backend"
+cd backend
+  mise run update
+cd -
+
+echo "Update frontend"
 cd backend
   mise run update
 cd -

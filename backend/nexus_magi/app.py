@@ -2,9 +2,11 @@
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
-from nexus_magi.chat_model import ChatModel
+# 生成されたAPIモデルをインポート
+from nexus_magi.api_gen.models import ChatMessage, ChatRequest, WebSocketResponse
+from nexus_magi.debate_chat_model import DebateChatModel
+from nexus_magi.simple_chat_model import SimpleChatModel
 
 
 class APIConfig:
@@ -31,28 +33,6 @@ class APIConfig:
 
 # APIの設定
 api_config = APIConfig()
-
-
-class ChatMessage(BaseModel):
-    """チャットメッセージのモデル."""
-
-    role: str
-    content: str
-
-
-class ChatRequest(BaseModel):
-    """チャットリクエストのモデル."""
-
-    messages: list[ChatMessage]
-    stream: bool = False
-    debate: bool = False
-    debate_rounds: int = 1
-
-
-class ChatResponse(BaseModel):
-    """チャットレスポンスのモデル."""
-
-    response: str
 
 
 class ConnectionManager:
@@ -92,8 +72,11 @@ manager = ConnectionManager()
 
 
 def format_messages(messages: list[ChatMessage]) -> list[dict[str, str]]:
-    """Pydanticモデルのメッセージリストを辞書リストに変換."""
-    return [{"role": msg.role, "content": msg.content} for msg in messages]
+    """Pydanticモデルのメッセージリストを辞書リストに変換.
+
+    Enumオブジェクトを文字列に変換して返します。
+    """
+    return [{"role": msg.role.value, "content": msg.content} for msg in messages]
 
 
 @app.get("/")
@@ -102,71 +85,48 @@ async def root() -> dict[str, str]:
     return {"message": "MAGI合議システム API"}
 
 
-@app.post("/api/chat")
-async def chat(request: ChatRequest) -> ChatResponse:
-    """チャットエンドポイント."""
-    # グローバル設定を使用してチャットモデルをインスタンス化
-    api_base = api_config.api_base  # デフォルト値を保証
-    model = api_config.model  # デフォルト値を保証
-
-    chat_model = ChatModel(api_base=api_base, model=model, api_type=api_config.api_type)
-    messages = format_messages(request.messages)
-
-    response = await chat_model.get_response(messages)
-    return ChatResponse(response=response)
-
-
 @app.websocket("/api/chat/ws")
-async def websocket_endpoint(websocket: WebSocket) -> None:
-    """WebSocketエンドポイント."""
+async def chat_websocket_endpoint(websocket: WebSocket) -> None:
+    """通常チャット用WebSocketエンドポイント."""
     await manager.connect(websocket)
     try:
         while True:
             # クライアントからのメッセージを待機
             data = await websocket.receive_json()
-            # WebSocketから受信したデータをログ出力
 
             # ChatRequestの形式に変換
             request = ChatRequest(**data)
             messages = format_messages(request.messages)
 
-            # グローバル設定を使用してチャットモデルをインスタンス化
-            api_base = api_config.api_base  # デフォルト値を保証
-            model = api_config.model  # デフォルト値を保証
+            # グローバル設定を使用
+            api_base = api_config.api_base
+            model = api_config.model
+            api_type = api_config.api_type
 
-            chat_model = ChatModel(
-                api_base=api_base, model=model, api_type=api_config.api_type
+            # SimpleChatModelを使用
+            chat_model = SimpleChatModel(
+                api_base=api_base, model=model, api_type=api_type
             )
 
-            if request.debate:
-                # 討論モードの場合
-                async def send_update(system: str, response: str, phase: str) -> None:
-                    """討論モードでの更新をクライアントに送信."""
-                    response_data = {
-                        "system": system,
-                        "response": response,
-                        "phase": phase,
-                    }
-                    await websocket.send_json(response_data)
+            if request.stream:
+                # ストリーミングモードの場合
 
-                # 討論を含むストリーミングレスポンスを生成
-                async for _response in chat_model.get_response_with_debate(
-                    messages, send_update, debate_rounds=request.debate_rounds
-                ):
-                    # すでにコールバックで処理されているので、ここでは何もしない
-                    pass
-
-            elif request.stream:
-                # 通常のストリーミングモードの場合
+                # コールバック関数を定義
                 async def send_update(system: str, response: str) -> None:
                     """ストリーミングモードでの更新をクライアントに送信."""
-                    # phaseパラメータを追加してフロントエンドとのインターフェースを統一
-                    response_data = {
-                        "system": system,
-                        "response": response,
-                        "phase": "initial",  # 互換性のためにphaseを追加
+                    # OpenAPI生成モデルを使用してレスポンスを作成
+                    response_data = WebSocketResponse(
+                        system=system,
+                        response=response,
+                        phase="initial",  # 互換性のためにphaseを追加
+                    )
+                    # モデルをJSONに変換する際にEnumの値を取得するための辞書を作成
+                    response_dict = {
+                        "system": response_data.system.value,
+                        "response": response_data.response,
+                        "phase": response_data.phase,
                     }
-                    await websocket.send_json(response_data)
+                    await websocket.send_json(response_dict)
 
                 # ストリーミングレスポンスを生成
                 async for _response in chat_model.get_response_streaming(
@@ -174,16 +134,73 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 ):
                     # すでにコールバックで処理されているので、ここでは何もしない
                     pass
-
             else:
-                # 非ストリーミング、非討論モードの場合
+                # 非ストリーミングモードの場合
                 response = await chat_model.get_response(messages)
-                response_data = {
-                    "system": "consensus",
-                    "response": response,
-                    "phase": "final",
+                # OpenAPI生成モデルを使用してレスポンスを作成
+                response_data = WebSocketResponse(
+                    system="melchior",  # シンプルモードではmelchiorとして応答
+                    response=response,
+                    phase="initial",  # 単一の応答なのでinitialフェーズとする
+                )
+                # モデルをJSONに変換する際にEnumの値を取得するための辞書を作成
+                response_dict = {
+                    "system": response_data.system.value,
+                    "response": response_data.response,
+                    "phase": response_data.phase,
                 }
-                await websocket.send_json(response_data)
+                await websocket.send_json(response_dict)
+
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+
+@app.websocket("/api/debate/ws")
+async def debate_websocket_endpoint(websocket: WebSocket) -> None:
+    """討論モード用WebSocketエンドポイント."""
+    await manager.connect(websocket)
+    try:
+        while True:
+            # クライアントからのメッセージを待機
+            data = await websocket.receive_json()
+
+            # ChatRequestの形式に変換
+            request = ChatRequest(**data)
+            messages = format_messages(request.messages)
+
+            # グローバル設定を使用
+            api_base = api_config.api_base
+            model = api_config.model
+            api_type = api_config.api_type
+
+            # 討論モードはDebateChatModelを使用
+            chat_model = DebateChatModel(
+                api_base=api_base, model=model, api_type=api_type
+            )
+
+            # コールバック関数を定義
+            async def send_update(system: str, response: str, phase: str) -> None:
+                """討論モードでの更新をクライアントに送信."""
+                # OpenAPI生成モデルを使用してレスポンスを作成
+                response_data = WebSocketResponse(
+                    system=system,
+                    response=response,
+                    phase=phase,
+                )
+                # モデルをJSONに変換する際にEnumの値を取得するための辞書を作成
+                response_dict = {
+                    "system": response_data.system.value,
+                    "response": response_data.response,
+                    "phase": response_data.phase,
+                }
+                await websocket.send_json(response_dict)
+
+            # 討論を含むストリーミングレスポンスを生成
+            async for _response in chat_model.get_response_with_debate(
+                messages, send_update, debate_rounds=request.debate_rounds
+            ):
+                # すでにコールバックで処理されているので、ここでは何もしない
+                pass
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
