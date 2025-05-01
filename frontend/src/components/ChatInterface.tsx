@@ -15,6 +15,8 @@ import SendIcon from '@mui/icons-material/Send';
 import MessageBubble from './MessageBubble.tsx';
 import MagiSystemResponse from './MagiSystemResponse.tsx';
 import { connectToWebSocket } from '../services/apiService.ts';
+import { WebSocketConnection } from '../services/websocketClient.ts';
+import { ChatMessage } from '../generated-api';
 
 // メッセージの型定義
 interface Message {
@@ -59,7 +61,7 @@ const ChatInterface: React.FC = () => {
   const [magiMessageId, setMagiMessageId] = useState<number | null>(null);
 
   // WebSocket接続オブジェクト
-  const wsConnectionRef = useRef<WebSocket | null>(null);
+  const wsConnectionRef = useRef<WebSocketConnection | null>(null);
 
   // 討論モードの状態
   const [debateMode, setDebateMode] = useState<boolean>(true);
@@ -123,7 +125,12 @@ const ChatInterface: React.FC = () => {
     // WebSocketに接続
     console.log('WebSocket接続を開始');
     wsConnectionRef.current = connectToWebSocket({
-      messages: newMessages,
+      messages: newMessages.map(
+        (msg): ChatMessage => ({
+          role: msg.role === 'user' ? ChatMessage.role.USER : ChatMessage.role.ASSISTANT,
+          content: msg.content,
+        })
+      ),
       debate: debateMode, // 討論モードの設定によってエンドポイントが選択される
       debateRounds: debateRounds,
       onMelchiorResponse: (response: string, phase?: string) => {

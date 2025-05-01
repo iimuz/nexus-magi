@@ -4,6 +4,8 @@ import { Box, Container, TextField, Button, Paper } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MessageBubble from '../MessageBubble.tsx';
 import { connectToWebSocket } from '../../services/apiService.ts';
+import { WebSocketConnection } from '../../services/websocketClient.ts';
+import { ChatMessage } from '../../generated-api';
 
 // メッセージの型定義
 interface Message {
@@ -27,7 +29,7 @@ const SimpleChatInterface: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // WebSocket接続オブジェクト
-  const wsConnectionRef = useRef<WebSocket | null>(null);
+  const wsConnectionRef = useRef<WebSocketConnection | null>(null);
 
   // メッセージリストの参照
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -71,7 +73,12 @@ const SimpleChatInterface: React.FC = () => {
     // WebSocketに接続（シンプルモード用のエンドポイント）
     console.log('WebSocket接続を開始');
     wsConnectionRef.current = connectToWebSocket({
-      messages: newMessages,
+      messages: newMessages.map(
+        (msg): ChatMessage => ({
+          role: msg.role === 'user' ? ChatMessage.role.USER : ChatMessage.role.ASSISTANT,
+          content: msg.content,
+        })
+      ),
       debate: false, // シンプルモード
       onMelchiorResponse: (response: string) => {
         // シンプルモードではMelchiorのコールバックに応答が来るが、
